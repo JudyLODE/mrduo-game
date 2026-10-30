@@ -46,6 +46,7 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 .savebox{display:flex;gap:14px;align-items:center;background:var(--paper2);border:3px solid var(--line);border-radius:16px;padding:12px 16px;margin:6px 0 10px}.savebox b{display:block;font-size:19px}.savebox small{color:var(--ink2);font-size:15px}
 .saveicon{width:44px;height:44px;border-radius:50%;background:#8DB36E;color:#fff;display:grid;place-items:center;font-size:24px;font-weight:900;border:3px solid var(--line);flex:none}
 #mBody.lock *{pointer-events:none!important}
+.roundtag{display:inline-block;background:var(--paper2);border:3px dashed var(--theme);color:var(--theme-d);border-radius:999px;padding:4px 14px;font-weight:900;font-size:15px;margin:4px 0 8px}
 .hbtn{background:var(--sun);border:3px solid var(--line);border-radius:999px;padding:4px 14px;font-weight:900;font-size:16px;box-shadow:0 3px 0 var(--line);min-height:40px}
 .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .bone{display:inline-block;width:22px;height:12px;position:relative;vertical-align:middle}
@@ -424,6 +425,8 @@ const KEY='duoshu-case1-v3';
 let G={av:{k:'cat',m:'smile'},name:'',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};
 const hard=()=>true;
 function markDone(id){G.done=G.done||{};const a=G.done[G.ch]=G.done[G.ch]||[];if(!a.includes(id))a.push(id);G.saved=Date.now();save()}
+const META='duoshu-meta';function meta(){try{return JSON.parse(localStorage.getItem(META)||'null')||{clears:0}}catch(e){return {clears:0}}}
+function setMeta(m){try{localStorage.setItem(META,JSON.stringify(m))}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||'null');return v&&typeof v.ch==='number'?v:null}catch(e){return null}}
 const fmt=t=>t.replace(/\{n\}/g,G.name||'助手');
@@ -1198,7 +1201,8 @@ function evidence(title,text){return new Promise(res=>{const n=(SC.evN=(SC.evN||
   modal(`<div class="card evid" style="width:min(580px,100%)"><div class="stampE">證物 #${String(n).padStart(2,'0')}</div><div class="evtag">破案進度 ${n}/${tot}</div><h3>${title}</h3><p class="lead" style="font-size:20px">${text}</p><div class="row"><button class="btn c" id="evOk">收進偵探筆記</button></div></div>`,b=>{b.querySelector('#evOk').onclick=()=>{closeModal();res()}})})}
 
 /* puzzle hotspot factory */
-function pz(id,x,y,o){return {id,type:o.npc?'npc':'thing',actor:o.npc,x,y,s:o.s,r:o.r||60,sx:o.sx,sy:o.sy,need:true,hint:o.hint,art:o.art,
+const ROUND=()=>(G&&G.round)||0,ALT=()=>ROUND()%2===1;
+function pz(id,x,y,o){if(ALT()&&ALTS()[id])o=Object.assign({},o,ALTS()[id]);return {id,type:o.npc?'npc':'thing',actor:o.npc,x,y,s:o.s,r:o.r||60,sx:o.sx,sy:o.sy,need:true,hint:o.hint,art:o.art,
   tap:async sp=>{
     if(sp.done){if(typeof o.after==='function')await o.after(sp);else await say(o.npc||'duo',o.after||'這裡已經調查完了。');return}
     for(const l of (o.intro||[]))await say(l[0],l[1],l[2]||{});
@@ -1229,6 +1233,7 @@ function shelfPic(){let s=`<rect width="800" height="500" fill="#C86062"/>`;[120
   return s}
 function boatPhoto(){return `<rect width="600" height="600" fill="#92C3DB"/><circle cx="500" cy="90" r="50" fill="#D4BB49"/><rect y="400" width="600" height="200" fill="#599EC4"/><path d="M60 420 Q80 500 160 510 H460 Q540 500 560 420Z" fill="#FFFFFF" stroke="${INK}" stroke-width="6"/><rect x="60" y="440" width="500" height="16" fill="#C86062"/><rect x="170" y="330" width="260" height="96" rx="12" fill="#F4EDD2" stroke="${INK}" stroke-width="5"/><g transform="translate(300 470) scale(1.25)">${critter({k:'xfox',shirt:'#3D3E52',hat:{t:'cap',c:'#C86062'},glasses:1,bag:'o'})}</g><text x="300" y="560" text-anchor="middle" font-size="34" font-weight="900" fill="${INK}">日月號</text>`}
 function cabinPic(){return `<rect width="800" height="500" fill="#F4EDD2"/>${[0,1,2,3,4,5,6,7].map(k=>`<line x1="${k*100}" y1="0" x2="${k*100}" y2="500" stroke="#D8C29B" stroke-width="4"/>`).join('')}<rect x="560" y="60" width="180" height="130" rx="16" fill="#92C3DB" stroke="${INK}" stroke-width="6"/><circle cx="120" cy="420" r="40" fill="#BB9A7A" stroke="${INK}" stroke-width="5"/>`}
+const cabinSecret2=`<text x="320" y="230" text-anchor="middle" font-size="46" font-weight="700" fill="#EADEF7" font-family="Fredoka,sans-serif">Look under</text><text x="320" y="300" text-anchor="middle" font-size="46" font-weight="700" fill="#EADEF7" font-family="Fredoka,sans-serif">the big rock.</text>`;
 const cabinSecret=`<text x="320" y="230" text-anchor="middle" font-size="46" font-weight="700" fill="#EADEF7" font-family="Fredoka,sans-serif">The key is</text><text x="320" y="300" text-anchor="middle" font-size="46" font-weight="700" fill="#EADEF7" font-family="Fredoka,sans-serif">under the rock.</text><text x="320" y="380" text-anchor="middle" font-size="60" font-weight="700" fill="#EADEF7" font-family="Fredoka,sans-serif">X</text>`;
 function windowPic(){let s=`<rect width="800" height="500" fill="#B87F6D"/>`;[[150,150],[400,150],[650,150]].forEach(([x,y])=>s+=`<rect x="${x-100}" y="${y-110}" width="200" height="330" rx="100" fill="#413737" stroke="${INK}" stroke-width="6"/>`);
   s+=`<g transform="translate(160 230)"><path d="M-40 10 Q-38 -40 0 -42 Q38 -40 40 10Z" fill="#C86062"/><rect x="-50" y="6" width="100" height="12" rx="6" fill="#C86062"/></g>`;
@@ -1401,6 +1406,104 @@ async function prologue(){
   hideDlg();await travel(null,'t101');
 }
 
+/* ================= second question set (used on every even-numbered playthrough) =================
+   Same scenes, same mini-games, but every school-subject question is new. */
+const ALT_SIGNS=[{"s": "觀景台的窗戶很乾淨，請勿用手觸莫。", "w": 15, "ok": "摸", "o": ["摸", "模", "漠"], "ex": "用手去碰是「摸」，所以是手字旁；「模」是木字旁，例如模型。"}, {"s": "看完風景後，請延著箭頭的方向離開。", "w": 7, "ok": "沿", "o": ["沿", "鉛", "船"], "ex": "「沿著」的沿有三點水；「延長」的延沒有三點水。"}, {"s": "古堡裡的大砲很重要，請不要攀爬或座在上面。", "w": 16, "ok": "坐", "o": ["坐", "座", "做"], "ex": "「坐下」的坐是動作；「座位」的座是地方，上面有广字頭。"}, {"s": "參觀古堡時請保持安靜，不要大聲喊較。", "w": 16, "ok": "叫", "o": ["叫", "較", "教"], "ex": "「喊叫」要用嘴巴，所以是口字旁的「叫」。"}, {"s": "雖然怪盜X很絞猾，但是多叔一定會抓到他。", "w": 6, "ok": "狡", "o": ["狡", "絞", "餃"], "ex": "「狡猾」的狡是犬字旁（犭）；「絞」是糸字旁。這句用了「雖然……，但是……」。"}, {"s": "如果天一黑，怪盜X就要朵進人群。", "w": 11, "ok": "躲", "o": ["躲", "朵", "垛"], "ex": "「躲藏」要用身體，所以是身字旁；「花朵」的朵沒有身字旁。這句用了「如果……就……」。"}];
+const ALTS_SRC=()=>({
+  /* ---------- Chapter 1: Taipei 101 ---------- */
+  bear:{intro:[['bear','偵探先生！我一直守在電梯口。剛剛有個戴著圓圓眼鏡的人，鬼鬼祟祟地走過去。'],['bear','他經過的時候，還抬頭看了一眼牆上的時鐘……']],
+    run:()=>quiz('熊阿伯的證詞',[
+      {q:'熊阿伯看到可疑的人時，時鐘是這樣。那時候是幾點幾分？',pic:clockSvg(2,20),o:['2 點 20 分','4 點 10 分','2 點 4 分'],ex:'短針剛過 2，長針指著 4，4 × 5 ＝ 20，就是 2 點 20 分。',hint:'長針指著 4，一大格是 5 分鐘，4 大格是幾分？'},
+      {q:'那個人 2:20 經過電梯口，過了 35 分鐘，又出現在紀念品店。那時候是幾點幾分？',o:['2 點 55 分','3 點 5 分','2 點 45 分'],ex:'20 分再加 35 分是 55 分，還不到 60 分，所以是 2 點 55 分。',hint:'20 ＋ 35 ＝ ？ 有沒有超過 60 分？'}]),
+    ev:['熊阿伯的證詞','可疑的人戴著圓圓的眼鏡，2:20 經過電梯口，2:55 到了紀念品店。']},
+  leo:{intro:[['leo','歡迎光臨！剛剛有位戴眼鏡的客人，買了 4 個101鑰匙圈，丟下錢就跑了。'],['leo','這是收據，我還沒算清楚……']],
+    run:()=>calc('紀念品店的收據',[{q:'一個101鑰匙圈 245 元，客人買了 4 個，一共要多少元？',a:980,unit:'元',hint:'245 × 4：5 × 4 ＝ 20，寫 0 進 2……'},{q:'客人只留下 900 元就跑走了。他少付了多少元？',a:80,unit:'元',hint:'980 − 900 ＝ ？'}]),
+    ev:['紀念品店收據','戴眼鏡的客人少付了 80 元就跑走了，非常可疑。']},
+  koala:{run:()=>quiz('和 Mr. Koala 說英文',[
+      {q:'Mr. Koala 指著熊阿伯問：「Is he a cook?」要怎麼回答？',say:'Is he a cook?',en:1,pic:`<div style="height:170px">${head(CAST.bear.look)}</div>`,o:["No, he isn't.","Yes, she is.","Yes, I am."],ex:"熊阿伯是保全，不是廚師，所以說 No, he isn't.（不，他不是。）"},
+      {q:'Mr. Koala 笑著問你：「How are you?」',say:'How are you?',en:1,o:["I'm fine. Thank you.","I'm ten.","It's a cat."],ex:'How are you? 是問「你好嗎？」，回答 I\'m fine. Thank you.（我很好，謝謝。）'},
+      {q:'Mr. Koala 說：「The man has big glasses.」這句話是什麼意思？',say:'The man has big glasses.',o:['那個男人戴著大眼鏡','那個男人有一頂大帽子','那個男人有一隻大狗'],ex:'big 是大的，glasses 是眼鏡。'}]),
+    ev:['Mr. Koala 的證詞','The man has big glasses. 外國觀光客也看到可疑的人戴著眼鏡。']},
+  panel:{intro:[['duo','電梯又被怪盜X換了新的密碼！要解開三道乘法密碼，電梯才會動。']],
+    run:()=>mathLock([{a:254,b:4,q:'第一道密碼：254 × 4'},{a:127,b:6,q:'第二道密碼：每層樓有 127 扇窗戶，6 層樓一共有幾扇？'},{a:382,b:3,q:'第三道密碼：89 樓觀景台大約在 382 公尺高的地方。3 倍高是幾公尺？'}])},
+  damper:{run:()=>quiz('擺錘實驗',[
+      {q:'三個擺錘一起擺動，哪一個擺得最快（來回一次最短）？',pic:pendSvg(),o:['A','B','C','三個一樣快'],ex:'擺長越短，擺動越快。A 的繩子最短，所以最快。',hint:'仔細看動畫，哪一個來回最匆忙？'},
+      {q:'想讓擺錘擺得慢一點，可以怎麼做？',o:['把繩子加長','把繩子剪短','換成比較輕的擺錘'],ex:'擺長越長，擺動越慢；擺錘的輕重影響不大。'},
+      {q:'擺錘來回擺動一次的時間，主要和什麼有關？',o:['擺長','擺錘的顏色','擺錘的重量'],ex:'擺動的快慢主要決定於擺長。'}])},
+  scope:{run:()=>quiz('地圖上的方位',[
+      {q:'一般的地圖，右邊是哪一個方位？',pic:compassMap(),o:['東方','西方','北方'],ex:'上北、下南、左西、右東，右邊是東方。'},
+      {q:'台北101在日月潭的哪一個方向？',pic:compassMap(),o:['北方','南方','東方'],ex:'台北在台灣北部，日月潭在中部，所以台北在日月潭的北方。'},
+      {q:'從日月潭要去台南的安平古堡，大約要往哪個方向走？',pic:compassMap(),o:['西南方','東北方','正北方'],ex:'台南在日月潭的南邊偏西，所以是西南方。'},
+      {q:'野柳在台灣的哪一部分？',pic:compassMap(),o:['北部','南部','東部'],ex:'野柳在新北市的北海岸，屬於台灣北部。'}])},
+  steps:{run:()=>calc('量鞋印',[{q:'鞋印是 24 公分長。1 公分是 10 毫米，鞋印是幾毫米？',pic:rulerSvg(),a:240,unit:'毫米',hint:'24 × 10 ＝ ？'},{q:'沿著鞋印走過去，怪盜X走了 5 步，每一步大約 40 公分。他一共走了幾公分？',a:200,unit:'公分',hint:'40 × 5 ＝ ？'}])},
+  note:{run:()=>cipher('數字密碼紙條',[{n:[12,1,13,16],a:'LAMP',zh:'燈'},{n:[21,16],a:'UP',zh:'上面'}]),
+    ev:['密碼紙條','LAMP、UP：怪盜X要偷的，就是「最上面的燈」——頂端的燈！']},
+  poster:{run:()=>signs([ALT_SIGNS[0],ALT_SIGNS[1]])},
+  /* ---------- Chapter 2: Sun Moon Lake ---------- */
+  otter:{run:()=>quiz('和水獺船長說英文',[
+      {q:'水獺船長指著藍鵲阿姨問：「Is she a cook?」',say:'Is she a cook?',en:1,pic:`<div style="height:170px">${head(CAST.magpie.look)}</div>`,o:['Yes, she is.','Yes, he is.',"No, I'm not."],ex:'藍鵲阿姨戴著廚師帽，是廚師。問 she（她），所以回答 Yes, she is.'},
+      {q:"水獺船長問你：「What's your name?」",say:"What's your name?",en:1,o:['My name is Amy.',"I'm nine.","It's red."],ex:'問名字，要回答 My name is……（我的名字是……）。'},
+      {q:'湖邊有三位老師在拍照。船長問：「Are they teachers?」',say:'Are they teachers?',en:1,o:['Yes, they are.','Yes, he is.',"No, she isn't."],ex:'they（他們）是很多人，所以回答 Yes, they are.'}])},
+  tape:{run:()=>listenHunt([{id:'snake',s:'It is long. It has no legs.',zh:'牠長長的，沒有腳。'},{id:'swan',s:'It is white. It can swim.',zh:'牠白白的，會游泳。'},{id:'sloth',s:'It is in the tree. It is sleeping.',zh:'牠在樹上，正在睡覺。'},{id:'snail',s:'It is slow. It has a shell.',zh:'牠慢吞吞的，背著一個殼。'}])},
+  bottle:{run:()=>quiz('瓶中的英文信',[
+      {q:'信上寫：「X has a red hat and big glasses.」怪盜X有什麼？',say:'X has a red hat and big glasses.',o:['紅帽子和大眼鏡','藍帽子和小眼鏡','紅鞋子和大包包'],ex:'red hat 是紅帽子，big glasses 是大眼鏡。'},
+      {q:'信上又寫：「I can\'t swim.」是什麼意思？',say:"I can't swim.",o:['我不會游泳','我會游泳','我不想跑步'],ex:"can't 是「不會、不能」，swim 是游泳。"},
+      {q:'信的最後寫：「See you at the lake.」lake 是什麼？',say:'See you at the lake.',o:['湖','山','船'],ex:'lake 是湖，日月潭就是一個大湖。'}])},
+  lock:{run:()=>hangman([{w:'SWAN',zh:'天鵝（sw 開頭）',emo:'🦢'},{w:'NURSE',zh:'護士（職業單字）',emo:'🧑‍⚕️'},{w:'FARMER',zh:'農夫（職業單字）',emo:'🧑‍🌾'}])},
+  magpie:{run:()=>calc('茶葉蛋攤的帳',[{q:'一顆茶葉蛋 15 元，買 7 顆要多少元？',a:105,unit:'元',hint:'15 × 7 ＝ ？'},{q:'鍋子裡有 144 顆蛋，每 8 顆裝一袋，可以裝成幾袋？',a:18,unit:'袋',hint:'144 ÷ 8：先想 14 ÷ 8 商 1 餘 6，再算 64 ÷ 8。'}])},
+  moon:{run:async()=>{await seq('月相排序','這次從「滿月」開始，照日期先後把月亮排好。',[{h:moon(2),l:'滿月'},{h:moon(3),l:'下弦月'},{h:moon(0),l:'新月'},{h:moon(1),l:'上弦月'}]);
+      await quiz('月亮小測驗',[{q:'滿月大約出現在農曆的哪一天？',pic:`<div style="display:flex;justify-content:center;gap:20px">${moon(2)}</div>`,o:['十五日左右','初一','初八'],ex:'農曆十五左右是滿月，所以中秋節（八月十五）月亮又圓又亮。'}])}},
+  gauge:{run:async()=>{await seq('冰塊的變化','冰塊放在太陽下，照順序排出它的變化。',[{l:'冰塊是固態，摸起來冰冰硬硬的'},{l:'冰塊吸收熱，慢慢融化成水'},{l:'水是液態，會到處流動'},{l:'水繼續被太陽照射，蒸發成水蒸氣'}]);
+      await quiz('水的三態',[{q:'冬天早上，窗戶玻璃的內側出現許多小水滴，這是什麼現象？',o:['凝結','融化','蒸發'],ex:'屋裡的水蒸氣碰到冰冷的玻璃，凝結成小水滴。'}])}},
+  weather:{run:()=>quiz('今天的氣溫折線圖',[
+      {q:'16 時（下午 4 點）的溫度是幾度？',pic:chartSvg(),o:['27 度','31 度','25 度'],ex:'找到 16 時，往上對到折線，是 27 度。'},
+      {q:'今天什麼時候溫度最低？',pic:chartSvg(),o:['早上 8 點','中午 12 點','下午 4 點'],ex:'折線最低的點在 8 時，只有 22 度。'},
+      {q:'從 14 時到 16 時，溫度下降了幾度？',pic:chartSvg(),o:['4 度','2 度','27 度'],ex:'14 時是 31 度，16 時是 27 度，31 − 27 ＝ 4 度。'}])},
+  tracks:{run:()=>quiz('動物腳印鑑定',[
+      {q:'哪一組腳印的腳趾之間連著一片蹼？',pic:trackSvg(),o:['A','B','C'],ex:'A 的腳趾之間有蹼，是鴨子的腳印。'},
+      {q:'狗走路時，腳印常常看得到爪痕，為什麼？',pic:trackSvg(),o:['狗的爪子不能收起來','狗沒有肉墊','狗都用跳的'],ex:'狗的爪子不能像貓一樣收起來，所以腳印常有爪痕。'},
+      {q:'鴨子的腳有蹼，對牠有什麼幫助？',o:['方便在水裡划水','方便爬樹','方便挖洞'],ex:'蹼像小船槳，讓鴨子在水裡游得又快又穩。'}])},
+  cabin:{run:async()=>{await lens('紫外線手電筒','移動紫色的燈光，照出牆上的隱形字，看清楚再按「我看到了」。',{uv:1,pic:cabinPic(),secret:cabinSecret2});
+      await quiz('牆上的隱形字',[{q:'牆上寫：「Look under the big rock.」要去哪裡找鑰匙？',say:'Look under the big rock.',o:['大石頭的下面','大樹的上面','小船的裡面'],ex:'look 是看，under 是「在……下面」，big rock 是大石頭。'}])}},
+  shao:{run:()=>quiz('日月潭解說牌',[
+      {q:'邵族的獵人，是追著什麼動物發現日月潭的？',pic:passage('傳說很久以前，邵族的獵人在山裡追著一隻白鹿。他們越過一座又一座的山，最後白鹿跳進了一座美麗的大湖。獵人發現湖裡有好多魚，湖邊的土地又肥沃，就帶著族人搬到湖邊住下來。這座湖的北邊圓圓的像太陽，南邊彎彎的像月亮，所以叫做「日月潭」。'),o:['白鹿','黑熊','山豬'],ex:'解說牌說，獵人追著一隻白鹿，發現了日月潭。'},
+      {q:'「傳說」的意思最接近哪一個？',o:['很久以來流傳下來的故事','今天的新聞報導','考試的題目'],ex:'傳說是一代一代流傳下來的故事。'},
+      {q:'這座湖為什麼叫做「日月潭」？',o:['一邊像太陽，一邊像月亮','白天和晚上都很亮','湖裡有太陽和月亮的石頭'],ex:'湖的北邊像太陽，南邊像月亮，所以叫日月潭。'}])},
+  /* ---------- Chapter 3: Anping ---------- */
+  deer:{run:()=>calc('古堡的年紀',[{q:'熱蘭遮城在西元 1624 年開始建造，大約花了 10 年才蓋好。大約在西元幾年蓋好？',a:1634,unit:'年',hint:'1624 ＋ 10 ＝ ？'},{q:'城牆上的紅磚，一排有 36 塊，一共疊了 9 排。一共有幾塊紅磚？',a:324,unit:'塊',hint:'36 × 9 ＝ ？'}])},
+  turtle:{run:()=>quiz('海龜伯伯的證詞',[
+      {q:'他第一次來買蝦捲時，時鐘是這樣。那時候是幾點幾分？',pic:clockSvg(3,25),o:['3 點 25 分','5 點 15 分','3 點 5 分'],ex:'短針在 3 和 4 中間，長針指著 5，5 × 5 ＝ 25，是 3 點 25 分。'},
+      {q:'他 3:25 買蝦捲，吃了 40 分鐘後又回來買豆花。那時候是幾點幾分？',o:['4 點 5 分','3 點 65 分','4 點 15 分'],ex:'25 ＋ 40 ＝ 65 分，超過 60 分要進位：65 − 60 ＝ 5，所以是 4 點 5 分。'}])},
+  signA:{run:()=>signs([ALT_SIGNS[2],ALT_SIGNS[3]])},
+  signB:{run:()=>signs([ALT_SIGNS[4],ALT_SIGNS[5]])},
+  chest:{run:()=>chest([{word:'一<u>　</u>大樹',ans:'棵',L:['木','禾','火'],R:['果','早','里'],okL:'木',okR:'果',ex:'木＋果＝棵，一棵樹的「棵」和樹木有關，所以是木字旁！'},
+      {word:'一條小<u>　</u>',ans:'河',L:['氵','亻','口'],R:['可','丁','何'],okL:'氵',okR:'可',ex:'氵＋可＝河，河裡有水，所以是三點水！'},
+      {word:'打電話<u>　</u>朋友',ans:'給',L:['糹','言','扌'],R:['合','台','今'],okL:'糹',okR:'合',ex:'糹＋合＝給！'},
+      {word:'吃<u>　</u>餐',ans:'晚',L:['日','目','月'],R:['免','兔','先'],okL:'日',okR:'免',ex:'日＋免＝晚，晚上和太陽（日）下山有關！'},
+      {word:'<u>　</u>足球',ans:'踢',L:['足','扌','口'],R:['易','勿','昜'],okL:'足',okR:'易',ex:'足＋易＝踢，踢球要用腳，所以是足字旁！'}])},
+  paper:{run:()=>order([['雖然','偵探多叔','一直追我','但是','我會躲進老街的人群裡'],['等到','天黑以後','我就','換上新衣服','偷偷溜走']])},
+  cannon:{intro:[['duo','大砲的砲管被人轉了一個大大的角度。量量看是幾度！']],
+    run:()=>quiz('量角器',[
+      {q:'砲管轉起來的角度是幾度？（從右邊的 0 開始看）',pic:protSvg(120),o:['120 度','60 度','100 度'],ex:'從右邊的 0 數起，砲管對到 120。'},
+      {q:'120 度的角是哪一種角？',o:['鈍角','銳角','直角'],ex:'比 90 度大、比 180 度小的角是鈍角。'},
+      {q:'平角是幾度？',o:['180 度','90 度','360 度'],ex:'平角是一直線，180 度；直角是 90 度。'}])},
+  bricks:{run:()=>calc('城牆的祕密',[{q:'城牆上每一排的磚塊數是 3、6、12、24、？ 下一排有幾塊？',a:48,unit:'塊',hint:'每一排都是前一排的 2 倍。'},{q:'有一面正方形的城牆，邊長 6 公尺。這面牆的面積是多少平方公尺？',a:36,unit:'平方公尺',hint:'正方形面積 ＝ 邊長 × 邊長'}])},
+  tree:{run:()=>quiz('植物觀察',[
+      {q:'這種根有一條又粗又長的主根，旁邊長出細細的支根，叫做什麼？',pic:rootSvg('tap'),o:['軸根','鬚根','氣根'],ex:'有一條明顯主根的是軸根，例如蘿蔔、榕樹的小苗。'},
+      {q:'1 個節上長 2 片葉子，面對面生長，這種葉序叫做？',o:['對生','互生','輪生'],ex:'一個節長兩片、面對面是對生。'},
+      {q:'植物的根有什麼功用？',o:['吸收水分、固定植物','開出花朵','吸收陽光'],ex:'根會吸收水分和養分，還能把植物牢牢固定在土裡。'}])},
+  stall:{run:()=>fraction('吃剩的點心',[{q:'一盒蝦捲切成 6 段，怪盜X吃掉了 5/6。點一點，把他吃掉的部分塗起來。',d:6,a:5,shape:'bar'},{q:'一個豆花派平分成 3 份，怪盜X吃掉了 2/3。把吃掉的部分塗起來。',d:3,a:2,shape:'pie'}])},
+  pole:{run:()=>quiz('影子時鐘',[
+      {q:'早上太陽在東邊，竿子的影子會在哪一邊？',o:['西邊','東邊','北邊'],ex:'影子在太陽的相反方向。太陽在東，影子在西。'},
+      {q:'一天之中，什麼時候竿子的影子最短？',o:['中午','早上','傍晚'],ex:'中午太陽最高，影子最短。'},
+      {q:'圖中的影子又長又指向東邊，太陽在哪一邊？',pic:shadowSvg(true),o:['西邊','東邊','正上方'],ex:'影子指向東邊，太陽就在相反的西邊，而且很低。'}])},
+  compass:{run:()=>quiz('指北針與磁鐵',[
+      {q:'指北針藍色的 S 極，會指向哪個方位？',pic:`<div style="display:flex;justify-content:center"><svg viewBox="-60 -60 120 120" width="150" height="150"><circle r="54" fill="#FFFFFF" stroke="${INK}" stroke-width="5"/><path d="M0 -44 L10 0 L-10 0Z" fill="#C86062"/><path d="M0 44 L10 0 L-10 0Z" fill="#2B79B5"/></svg></div>`,o:['南方','北方','西方'],ex:'N 極指北，S 極就指向相反的南方。'},
+      {q:'一塊磁鐵的 N 極，靠近另一塊磁鐵的 S 極，會怎麼樣？',pic:magnetSvg(),o:['互相吸引','互相排斥（推開）','沒有反應'],ex:'異極相吸，同極相斥。'},
+      {q:'面向北方站好，你的右手邊是哪個方位？',o:['東方','西方','南方'],ex:'面向北方時，右手是東、左手是西、背後是南。'}])}
+});
+let ALTS_C=null;const ALTS=()=>ALTS_C||(ALTS_C=ALTS_SRC());
+
 /* ================= CHAPTER 1: Taipei 101 ================= */
 async function ch1(){
   G.ch=1;save();setCh('第一章　台北101的燈');DUO.coat=true;
@@ -1484,7 +1587,7 @@ async function ch1(){
   await say('duo','12 張證物卡都到手了！{n}，我們來推理吧！',{e:'confident'});
   hideDlg();await clueBoard(true);
   await ask('duo','熊阿伯和 Mr. Koala 都看到的可疑人物，有什麼特徵？',['戴著眼鏡','穿著紅色雨衣','拿著雨傘'],0,{scored:1});
-  await ask('duo','鞋印、指紋、密碼紙條……怪盜X這次的目標是什麼？',['101頂端的燈','紀念品店的錢','風阻尼器'],0,{scored:1,wrong:'想想密碼紙條：LIGHT、TOP。'});
+  await ask('duo','鞋印、指紋、密碼紙條……怪盜X這次的目標是什麼？',['101頂端的燈','紀念品店的錢','風阻尼器'],0,{scored:1,wrong:ALT()?'想想密碼紙條：LAMP、UP。':'想想密碼紙條：LIGHT、TOP。'});
   await say('duo','沒錯！戴眼鏡的人就是怪盜X變裝的。快上頂樓！',{e:'point'});
   await say('bear','糟了！電梯又被他弄壞了，只能走樓梯！');
   await say('duo','{n}，我們從走廊和樓梯追上去！',{e:'run'});
@@ -1620,12 +1723,12 @@ function listenHunt(list){
     let k=0,shown=false;
     const bar=document.createElement('div');bar.className='taskpill';bar.style.cssText='left:50%;transform:translateX(-50%);top:12px;display:flex;gap:10px;align-items:center;z-index:12;font-size:20px';
     $('#stage').appendChild(bar);$('#taskPill').hidden=true;
-    const sentence=()=>`Find the ${list[k]}.`;
-    function ui(){bar.innerHTML=`<span>聽英文，點出來（${k+1}/${list.length}）</span><button class="tool" id="lhP">再聽一次</button><button class="tool" id="lhT">${shown?sentence():'看英文'}</button>`;
+    const idOf=x=>typeof x==='string'?x:x.id,sentence=()=>typeof list[k]==='string'?`Find the ${list[k]}.`:list[k].s,zhOf=()=>typeof list[k]==='string'?'':`（${list[k].zh}）`;
+    function ui(){bar.innerHTML=`<span>聽英文，點出來（${k+1}/${list.length}）</span><button class="tool" id="lhP">再聽一次</button><button class="tool" id="lhT">${shown?sentence()+zhOf():'看英文'}</button>`;
       bar.querySelector('#lhP').onclick=()=>speak(sentence(),'en-US');bar.querySelector('#lhT').onclick=()=>{shown=true;ui()};speak(sentence(),'en-US')}
     ui();
     SC.mode=(id)=>{
-      if(id===list[k]){sGood();const sp=spot(id);$('#fxL').innerHTML+=`<circle cx="${sp.x}" cy="${sp.y-10}" r="70" fill="none" stroke="#50A260" stroke-width="10"/>`;speak(`${id}!`,'en-US');k++;shown=false;
+      if(id===idOf(list[k])){sGood();const sp=spot(id);$('#fxL').innerHTML+=`<circle cx="${sp.x}" cy="${sp.y-10}" r="70" fill="none" stroke="#50A260" stroke-width="10"/>`;speak(`${id}!`,'en-US');k++;shown=false;
         if(k>=list.length){SC.mode=null;bar.remove();setTimeout(()=>{$('#fxL').innerHTML='';res()},900)}else setTimeout(ui,900)}
       else{sBad();const nm={swan:'天鵝 swan',snail:'蝸牛 snail',snake:'蛇 snake',sloth:'樹懶 sloth'}[id];toast(nm?`這是 ${nm}，再聽一次！`:'不是這個，再聽一次！');if(nm)speak(id,'en-US')}
     };
@@ -1807,7 +1910,7 @@ function whack(){
   });
 }
 const WIN=[[340,380],[800,380],[1260,380],[340,740],[800,740],[1260,740]];
-function ending(){
+function ending(){if(!G.counted){G.counted=1;const m=meta();m.clears=(m.clears||0)+1;setMeta(m);save()}
   setCh('破案成功！');
   const stars=G.energy>=5?3:G.energy>=3?2:1;
   modal(`<div class="card cert" style="width:min(720px,100%)">
@@ -1818,7 +1921,7 @@ function ending(){
     <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
     <div class="stats"><div><b>${G.energy}/5</b>推理力</div><div><b>${G.badges.length}/9</b>骨頭徽章</div><div><b>${G.quests.length}/2</b>幫忙任務</div></div>
     <p class="lead">${G.badges.length<9?'還有骨頭徽章沒找到喔！再玩一次，把它們通通找出來吧。':'哇！所有骨頭徽章都找到了，你是觀察力超強的偵探！'}</p>
-    <div class="story" style="text-align:left">下一案預告：怪盜X盯上了北海岸的「女王頭」……</div>
+    <div class="story" style="text-align:left">下一案預告：怪盜X盯上了北海岸的「女王頭」……</div><p class="lead" style="margin:10px 0 0">再玩一次的話，所有國語、英文、數學、自然、地理題目都會換成新的喔！</p>
     <div class="row" style="justify-content:center;margin-top:14px"><button class="btn c" id="again">再玩一次</button></div></div>`,b=>{
     b.querySelector('#again').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}});
   G.ch=5;save();
@@ -1857,10 +1960,12 @@ $('#avEdit').onclick=()=>{let step=0;const keep={...AV};
     q('#avBack').onclick=()=>{if(step===0){AV={...keep};closeModal();avDraw()}else{step=0;draw()}};
     q('#avNext').onclick=()=>{if(step===0){step=1;draw()}else{sGood();closeModal();avDraw()}};
     draw();});};
-const prev=load();if(prev&&prev.av)AV={...prev.av};avDraw();
+const prev=load();
+function clearsNow(){const m=meta();let c=m.clears||0;if(!c&&prev&&prev.ch>=5){c=1;m.clears=1;setMeta(m)}return c}
+{const c=clearsNow();if(c>0){const t=document.createElement('div');t.className='roundtag';t.textContent=`已破案 ${c} 次・開始新的冒險會出現${c%2?'全新的第二套題目':'第一套題目'}`;$('#goBtn').parentElement.before(t)}}if(prev&&prev.av)AV={...prev.av};avDraw();
 if(prev&&prev.ch>=0&&prev.ch<=4){const dn=((prev.done||{})[prev.ch]||[]).length;$('#resBtn').hidden=false;
   $('#resBtn').innerHTML=`繼續上次的冒險<small>${['序章','第一章','第二章','第三章','最終章'][prev.ch]}${dn?`・已破解 ${dn} 關`:''}</small>`}
-const newGame=()=>{G={av:{...AV},name:$('#pname').value.trim()||'小偵探',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};save();tone([392,523,659],.1);$('#title').hidden=true;run(0)};
+const newGame=()=>{G={round:clearsNow(),av:{...AV},name:$('#pname').value.trim()||'小偵探',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};save();tone([392,523,659],.1);$('#title').hidden=true;run(0)};
 $('#goBtn').onclick=()=>{if(!prev||prev.ch>4){newGame();return}
   modal(`<div class="card" style="width:min(500px,100%)"><h3>要重新開始嗎？</h3><p class="lead">重新開始的話，上次存好的進度會被新的冒險取代。</p><div class="row" style="justify-content:flex-end;gap:10px"><button class="btn w" id="ngNo">回去繼續上次的</button><button class="btn c" id="ngYes">重新開始</button></div></div>`,b=>{b.querySelector('#ngYes').onclick=()=>{closeModal();newGame()};b.querySelector('#ngNo').onclick=()=>{closeModal();$('#resBtn').click()}})};
 $('#resBtn').onclick=()=>{G=Object.assign(G||{},prev);G.av={...AV};G.level='hard';G.name=$('#pname').value.trim()||prev.name||'小偵探';G.done=G.done||{};save();$('#title').hidden=true;hud();toast('讀取存檔成功！歡迎回來，'+G.name);run(prev.ch)};
