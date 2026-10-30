@@ -45,6 +45,7 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 #resBtn small{display:block;font-size:14px;font-weight:700;opacity:.75}
 .savebox{display:flex;gap:14px;align-items:center;background:var(--paper2);border:3px solid var(--line);border-radius:16px;padding:12px 16px;margin:6px 0 10px}.savebox b{display:block;font-size:19px}.savebox small{color:var(--ink2);font-size:15px}
 .saveicon{width:44px;height:44px;border-radius:50%;background:#8DB36E;color:#fff;display:grid;place-items:center;font-size:24px;font-weight:900;border:3px solid var(--line);flex:none}
+#mBody.lock *{pointer-events:none!important}
 .hbtn{background:var(--sun);border:3px solid var(--line);border-radius:999px;padding:4px 14px;font-weight:900;font-size:16px;box-shadow:0 3px 0 var(--line);min-height:40px}
 .hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .bone{display:inline-block;width:22px;height:12px;position:relative;vertical-align:middle}
@@ -602,7 +603,8 @@ async function ask(who,text,opts,correct,o={}){
 function talkAnim(who,on){const g=document.querySelector(`#spotL [data-actor="${who}"]`);if(g)g.classList.toggle('talking',on)}
 
 /* ================= modal ================= */
-function modal(html,bind){$('#mBody').innerHTML=html;$('#modal').hidden=false;const c=$('#mBody .card[data-duo]');if(c){const h3=c.querySelector('h3');if(h3)h3.insertAdjacentHTML('beforeend',`<span class="ptools"><button type="button" class="tool" data-peek>看現場</button><button type="button" class="tool" data-board>線索板</button></span>`);c.addEventListener('click',e=>{if(e.target.closest('[data-peek]'))peekOn();else if(e.target.closest('[data-board]'))clueBoard(false)});if(h3)h3.insertAdjacentHTML('afterbegin',`<span class="duoMini"><img class="duoFace" src="${FACE}" alt=""></span>`);setDuo(c.dataset.duo)}if(bind)bind($('#mBody'))}
+let LOCK_T=0;function lockFor(fn,ms){const m=$('#mBody');m.classList.add('lock');const t=++LOCK_T;setTimeout(()=>{if(t===LOCK_T)m.classList.remove('lock');if(fn)fn()},ms)}
+function modal(html,bind){$('#mBody').innerHTML=html;$('#modal').hidden=false;lockFor(null,380);const c=$('#mBody .card[data-duo]');if(c){const h3=c.querySelector('h3');if(h3)h3.insertAdjacentHTML('beforeend',`<span class="ptools"><button type="button" class="tool" data-peek>看現場</button><button type="button" class="tool" data-board>線索板</button></span>`);c.addEventListener('click',e=>{if(e.target.closest('[data-peek]'))peekOn();else if(e.target.closest('[data-board]'))clueBoard(false)});if(h3)h3.insertAdjacentHTML('afterbegin',`<span class="duoMini"><img class="duoFace" src="${FACE}" alt=""></span>`);setDuo(c.dataset.duo)}if(bind)bind($('#mBody'))}
 function closeModal(){$('#peekBtn').hidden=true;$('#stage').classList.remove('peek');$('#modal').hidden=true;$('#mBody').innerHTML='';shush()}
 function chapterCard(small,big,sub){return new Promise(res=>{const d=document.createElement('div');d.className='chap';d.innerHTML=`<div><small>${small}</small><b>${big}</b><span>${sub}</span></div>`;document.body.appendChild(d);sWin();setTimeout(()=>{d.remove();res()},2300);d.onclick=()=>{d.remove();res()}})}
 
@@ -911,7 +913,7 @@ function mathLock(probs){
           i++;miss=0;
           if(i>=ds.length){q('#mVf').innerHTML=vf();q('#mPrompt').innerHTML=`答案：${a} × ${bb} ＝ <span style="color:#2B79B5">${a*bb}</span>`;q('#mAns').textContent='';
             q('#mFb').textContent='密碼正確！';q('#mFb').className='fb ok';q('#lk').children[pi].className='on';q('#lk').children[pi].textContent='🔓';sWin();
-            setTimeout(()=>{pi++;if(pi<probs.length)start();else{closeModal();res()}},1600)}
+            lockFor(()=>{pi++;if(pi<probs.length)start();else{closeModal();res()}},1600)}
           else{render();if(c){q('#mFb').textContent=`滿十進位！把 ${c} 寫到${PN[i]}上面。`;q('#mFb').className='fb ok'}}}
         else{sBad();miss++;shake(q('#mAns'));val='';q('#mAns').textContent='';
           q('#mFb').textContent=miss===1?`再算一次：先想 ${ds[i]} × ${bb} 是多少${c?`，再加上進位的 ${c}`:''}。`:`提示：${ds[i]} × ${bb} ＝ ${ds[i]*bb}${c?`，${ds[i]*bb} ＋ ${c} ＝ ？`:''}`;q('#mFb').className='fb no'}}
@@ -947,8 +949,8 @@ function hangman(words){
       q('#hK').onclick=e=>{const k=e.target.closest('button');if(!k||k.disabled)return;const ch=k.dataset.c,w=words[wi].w;if(miss>=MAX)return;
         g.add(ch);k.disabled=true;if(w.includes(ch)){k.classList.add('hit');sGood();speak(ch,'en-US')}else{miss++;sBad()}draw();
         if(w.split('').every(x=>g.has(x))){q('#hF').innerHTML=`拼對了！<span style="font-family:var(--f-en);font-size:24px">${w}</span>`;q('#hF').className='fb ok';speak(w.toLowerCase(),'en-US');
-          q('#lk').children[wi].className='on';q('#lk').children[wi].textContent='🔓';wi++;setTimeout(()=>{if(wi<words.length)start();else{closeModal();res()}},1500)}
-        else if(miss>=MAX){q('#hF').innerHTML=`熱氣球飛走了！答案是 <b style="font-family:var(--f-en)">${w}</b>，再挑戰一次。`;q('#hF').className='fb no';setTimeout(start,2400)}};
+          q('#lk').children[wi].className='on';q('#lk').children[wi].textContent='🔓';wi++;lockFor(()=>{if(wi<words.length)start();else{closeModal();res()}},1500)}
+        else if(miss>=MAX){q('#hF').innerHTML=`熱氣球飛走了！答案是 <b style="font-family:var(--f-en)">${w}</b>，再挑戰一次。`;q('#hF').className='fb no';lockFor(start,2400)}};
       start();
     });
   });
@@ -991,7 +993,7 @@ function chest(items){
       function pick(row,e){const k=e.target.closest('button');if(!k)return;sPop();[...row.children].forEach(x=>x.setAttribute('aria-pressed',x===k));
         if(row===q('#cL'))L=k.textContent;else R=k.textContent;q('#cB').textContent=(L||'')+(R?'＋'+R:'');q('#cB').style.fontSize=(L&&R)?'40px':'72px';
         if(L&&R){const it=items[ii];if(L===it.okL&&R===it.okR){sWin();q('#cB').style.fontSize='72px';q('#cB').textContent=it.ans;q('#cF').textContent=it.ex;q('#cF').className='fb ok';
-            q('#lk').children[ii].className='on';q('#lk').children[ii].textContent='🔓';ii++;setTimeout(()=>{if(ii<items.length)start();else{closeModal();res()}},1900)}
+            q('#lk').children[ii].className='on';q('#lk').children[ii].textContent='🔓';ii++;lockFor(()=>{if(ii<items.length)start();else{closeModal();res()}},1900)}
           else{sBad();q('#cF').textContent='拼不出正確的字，換一個部件試試！';q('#cF').className='fb no';shake(q('#cB'))}}}
       q('#cL').onclick=e=>pick(q('#cL'),e);q('#cR').onclick=e=>pick(q('#cR'),e);start();
     });
@@ -1012,7 +1014,7 @@ function order(sents){
       q('#oS').onclick=e=>{const k=e.target.closest('button');if(!k)return;sPop();picked.push(+k.dataset.i);render()};
       q('#oR').onclick=start;
       q('#oC').onclick=()=>{const s=sents[si];if(picked.length<s.length){q('#oF').textContent='還有紙片沒用到喔！';q('#oF').className='fb no';return}
-        if(picked.every((v,i)=>v===i)){sWin();q('#oF').textContent='「'+s.join('')+'」';q('#oF').className='fb ok';si++;setTimeout(()=>{if(si<sents.length){q('#oF').textContent='';start()}else{closeModal();res()}},2000)}
+        if(picked.every((v,i)=>v===i)){sWin();q('#oF').textContent='「'+s.join('')+'」';q('#oF').className='fb ok';si++;lockFor(()=>{if(si<sents.length){q('#oF').textContent='';start()}else{closeModal();res()}},2000)}
         else{sBad();q('#oF').textContent='順序怪怪的，唸唸看通不通順？';q('#oF').className='fb no';shake(q('#oA'))}};
       start();
     });
@@ -1068,7 +1070,7 @@ function quiz(title,qs,o={}){return new Promise(res=>{let i=0;
       q('.qopts').onclick=e=>{const btn=e.target.closest('button');if(!btn||btn.disabled)return;if(Q.en)speak(btn.textContent,'en-US');
         if(+btn.dataset.k===0){sGood();btn.classList.add('right');[...q('.qopts').children].forEach(x=>x.disabled=true);tick(b,i);
           q('#qf').className='fb ok';q('#qf').innerHTML=`<div>${Q.ex||'答對了！'}</div><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn m" id="qn">${i<qs.length-1?'下一題':'完成'}</button></div>`;
-          q('#qn').onclick=()=>{i++;if(i<qs.length)show();else{closeModal();res()}}}
+          q('#qn').onclick=()=>{i++;if(i<qs.length){show();lockFor(null,450)}else{closeModal();res()}}}
         else{sBad();shake(btn);btn.disabled=true;q('#qf').className='fb no';q('#qf').textContent=Q.hint||'再想想看！'}};
     }
     show();});});}
@@ -1079,7 +1081,7 @@ function calc(title,qs,o={}){return new Promise(res=>{let i=0,val='',miss=0;
     function show(){const Q=qs[i];val='';miss=0;q('#cq').innerHTML=`${Q.pic?`<div class="qpic">${Q.pic}</div>`:''}<div class="story">${Q.q}</div>`;q('#cv').textContent='';q('#cu').textContent=Q.unit||'';q('#cf').textContent=''}
     q('#cp').onclick=e=>{const k=e.target.closest('button');if(!k)return;const v=k.dataset.k;
       if(v==='del')val=val.slice(0,-1);else if(v==='ok'){if(!val)return;const Q=qs[i];
-        if(+val===Q.a){sGood();tick(b,i);q('#cf').className='fb ok';q('#cf').textContent='答對了！'+(Q.ex||'');setTimeout(()=>{i++;if(i<qs.length)show();else{closeModal();res()}},1500)}
+        if(+val===Q.a){sGood();tick(b,i);q('#cf').className='fb ok';q('#cf').textContent='答對了！'+(Q.ex||'');lockFor(()=>{i++;if(i<qs.length)show();else{closeModal();res()}},1500)}
         else{sBad();miss++;shake(q('.ans'));val='';q('#cf').className='fb no';q('#cf').textContent=miss>1&&Q.hint2?Q.hint2:(Q.hint||'再算一次！')}}
       else if(val.length<5)val+=v;tone([520],.04,'sine',.08);q('#cv').textContent=val};
     show();});});}
@@ -1107,7 +1109,7 @@ function lens(title,lead,o){return new Promise(res=>{const id='L'+(++lensN),W=80
       found.add(t);sGood();tick(b,found.size-1);const T=o.targets[t];
       fl.insertAdjacentHTML('beforeend',`<circle cx="${T.x}" cy="${T.y}" r="${T.r}" fill="none" stroke="#8DB36E" stroke-width="6"/><g transform="translate(${T.x} ${T.y-T.r-12})"><rect x="-80" y="-26" width="160" height="34" rx="10" fill="#FFFFFF" stroke="${INK}" stroke-width="3"/><text y="0" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">${T.l}</text></g>`);
       b.querySelector('#lf').className='fb ok';b.querySelector('#lf').textContent=`找到「${T.l}」！（${found.size}/${o.targets.length}）`;
-      if(found.size===o.targets.length)setTimeout(()=>{closeModal();res()},1300)});
+      if(found.size===o.targets.length)lockFor(()=>{closeModal();res()},1300)});
     if(o.uv)b.querySelector('#lDone').onclick=()=>{closeModal();res()};
   });});}
 
@@ -1125,7 +1127,7 @@ function fingerprint(rounds){const R=[{t:'w',m:[[-30,-20],[24,40]]},{t:'l',m:[[3
         const cands=shuffle([{ok:1,t:T.t,m:T.m},{t:T.t,m:T.m.map(([x,y])=>[-x,y])},{t:other,m:T.m},{t:'a',m:T.m.slice(0,2)}]);
         q('#fb').innerHTML=`<div class="fpgrid"><div class="fptarget"><b>現場指紋</b>${fpSvg(T.t,T.m,170)}</div><div class="fpopts">${cands.map((c,k)=>`<button data-ok="${c.ok?1:0}">${fpSvg(c.t,c.m,110)}<span>${'ABCD'[k]}</span></button>`).join('')}</div></div>`;
         q('.fpopts').onclick=e=>{const btn=e.target.closest('button');if(!btn||btn.disabled)return;
-          if(btn.dataset.ok==='1'){sGood();btn.classList.add('right');tick(b,i);q('#ff').className='fb ok';q('#ff').textContent='完全吻合！';setTimeout(()=>{i++;if(i<R.length){q('#ff').textContent='';show()}else{closeModal();res()}},1300)}
+          if(btn.dataset.ok==='1'){sGood();btn.classList.add('right');tick(b,i);q('#ff').className='fb ok';q('#ff').textContent='完全吻合！';lockFor(()=>{i++;if(i<R.length){q('#ff').textContent='';show()}else{closeModal();res()}},1300)}
           else{sBad();shake(btn);btn.disabled=true;q('#ff').className='fb no';q('#ff').textContent='不一樣！先看紋路是圓圈、彎彎的還是像小山，再看紅點的位置。'}}}
       show();});});}
 
@@ -1135,7 +1137,7 @@ function tiles(title,pic){return new Promise(res=>{let ord;do{ord=shuffle([0,1,2
     function draw(){g.innerHTML=ord.map((p,k)=>`<button data-k="${k}" class="${k===sel?'sel':''}"><svg viewBox="${(p%3)*200} ${Math.floor(p/3)*200} 200 200">${pic}</svg></button>`).join('')}
     g.onclick=e=>{const btn=e.target.closest('button');if(!btn)return;const k=+btn.dataset.k;
       if(sel<0){sel=k;sPop()}else{[ord[sel],ord[k]]=[ord[k],ord[sel]];sel=-1;tone([600],.05,'sine',.1)}draw();
-      if(ord.every((v,k)=>v===k)){sGood();b.querySelector('#tf').className='fb ok';b.querySelector('#tf').textContent='照片拼好了！';g.onclick=null;setTimeout(()=>{closeModal();res()},1600)}};
+      if(ord.every((v,k)=>v===k)){sGood();b.querySelector('#tf').className='fb ok';b.querySelector('#tf').textContent='照片拼好了！';g.onclick=null;lockFor(()=>{closeModal();res()},1600)}};
     draw();});});}
 
 /* fractions: tap to shade */
@@ -1146,7 +1148,7 @@ function fraction(title,qs){return new Promise(res=>{let i=0;
       else{for(let k=0;k<Q.d;k++)s+=`<rect data-k="${k}" x="${10+k*(620/Q.d)}" y="20" width="${620/Q.d}" height="110" rx="10" fill="${on.has(k)?'#D29841':'#FFFFFF'}" stroke="${INK}" stroke-width="5"/>`;q('#fs').innerHTML=SV('0 0 640 150',s,170)}}
     function show(){on=new Set();q('#fq').innerHTML=qs[i].q;q('#ffb').textContent='';draw()}
     q('#fs').onclick=e=>{const p=e.target.closest('[data-k]');if(!p)return;const k=+p.dataset.k;on.has(k)?on.delete(k):on.add(k);sPop();draw()};
-    q('#fok').onclick=()=>{const Q=qs[i];if(on.size===Q.a){sGood();tick(b,i);q('#ffb').className='fb ok';q('#ffb').textContent=`答對了！${Q.a}/${Q.d} 就是 ${Q.d} 份裡的 ${Q.a} 份。`;setTimeout(()=>{i++;if(i<qs.length)show();else{closeModal();res()}},1600)}
+    q('#fok').onclick=()=>{const Q=qs[i];if(on.size===Q.a){sGood();tick(b,i);q('#ffb').className='fb ok';q('#ffb').textContent=`答對了！${Q.a}/${Q.d} 就是 ${Q.d} 份裡的 ${Q.a} 份。`;lockFor(()=>{i++;if(i<qs.length)show();else{closeModal();res()}},1600)}
       else{sBad();q('#ffb').className='fb no';q('#ffb').textContent=`現在塗了 ${on.size} 份。分母 ${Q.d} 是總共分幾份，分子 ${Q.a} 是要塗幾份。`}};
     show();});});}
 
@@ -1174,7 +1176,7 @@ function cipher(title,rounds){return new Promise(res=>{let i=0,pos=0;const AB='A
     function show(){pos=0;const R=rounds[i];q('#cn').textContent=R.n.join(' - ');q('#cs').innerHTML=R.a.split('').map(()=>`<div class="slot"></div>`).join('');q('#cf').textContent='用上面的表，把數字換成英文字母。'}
     q('#ck').onclick=e=>{const k=e.target.closest('button');if(!k)return;const R=rounds[i];
       if(k.dataset.c===R.a[pos]){q('#cs').children[pos].textContent=R.a[pos];pos++;tone([660],.06);
-        if(pos===R.a.length){sGood();tick(b,i);speak(R.a.toLowerCase(),'en-US');q('#cf').className='fb ok';q('#cf').textContent=`${R.a}，意思是「${R.zh}」！`;setTimeout(()=>{i++;if(i<rounds.length)show();else{closeModal();res()}},1800)}}
+        if(pos===R.a.length){sGood();tick(b,i);speak(R.a.toLowerCase(),'en-US');q('#cf').className='fb ok';q('#cf').textContent=`${R.a}，意思是「${R.zh}」！`;lockFor(()=>{i++;if(i<rounds.length)show();else{closeModal();res()}},1800)}}
       else{sBad();shake(k);q('#cf').className='fb no';q('#cf').textContent=`第 ${pos+1} 個數字是 ${R.n[pos]}，在表上找 ${R.n[pos]} 對應的字母。`}};
     show();});});}
 
@@ -1186,7 +1188,7 @@ function seq(title,lead,items){return new Promise(res=>{let picked=[];
     q('#sS').onclick=e=>{const btn=e.target.closest('button');if(!btn)return;picked.push(+btn.dataset.k);sPop();draw()};
     q('#sR').onclick=()=>{picked=[];draw()};
     q('#sC').onclick=()=>{if(picked.length<items.length){q('#sF').className='fb no';q('#sF').textContent='還有卡片沒排上去喔！';return}
-      if(picked.every((v,k)=>v===k)){sGood();q('#sF').className='fb ok';q('#sF').textContent='順序完全正確！';setTimeout(()=>{closeModal();res()},1500)}
+      if(picked.every((v,k)=>v===k)){sGood();q('#sF').className='fb ok';q('#sF').textContent='順序完全正確！';lockFor(()=>{closeModal();res()},1500)}
       else{sBad();shake(q('#sA'));q('#sF').className='fb no';q('#sF').textContent='順序怪怪的，再想想看。按「重來」重新排。'}};
     draw();});});}
 
@@ -1313,7 +1315,7 @@ function mazeChase(){return new Promise(res=>{const R=MAZE.length,C=MAZE[0].leng
       s+=`<image href="${COAT.bust_coat.b}" x="${pos[0]*100+8}" y="${pos[1]*100+4}" width="84" height="94"/>`;q('#mzS').innerHTML=s}
     function move(dx,dy){const nx=pos[0]+dx,ny=pos[1]+dy;if(nx<0||ny<0||nx>=C||ny>=R||MAZE[ny][nx]==='#'){tone([200],.05,'square',.05);return}
       pos=[nx,ny];tone([600],.04,'sine',.08);const k=nx+','+ny;if(coins.has(k)){coins.delete(k);G.mz=(G.mz||0)+1;tone([880,1175],.08)}
-      draw();if(MAZE[ny][nx]==='X'){clearInterval(timer);sWin();q('#mzF').className='fb ok';q('#mzF').textContent='追上了！';setTimeout(()=>{closeModal();res()},1300)}}
+      draw();if(MAZE[ny][nx]==='X'){clearInterval(timer);sWin();q('#mzF').className='fb ok';q('#mzF').textContent='追上了！';lockFor(()=>{closeModal();res()},1300)}}
     q('.dpad').onclick=e=>{const x=e.target.closest('button');if(!x)return;const [dx,dy]=x.dataset.d.split(',').map(Number);move(dx,dy)};
     q('#mzS').onclick=e=>{const c=e.target.closest('[data-c]');if(!c)return;const [x,y]=c.dataset.c.split(',').map(Number);const dx=x-pos[0],dy=y-pos[1];if(Math.abs(dx)+Math.abs(dy)===1)move(dx,dy)};
     window.__mz={move,pos:()=>pos};start();});})}
@@ -1341,7 +1343,7 @@ function tailGame(){return new Promise(res=>{let prog=0,look=0,warn=false,hold=f
       else if(phase===2&&now>nextTurn){phase=0;look=0;nextTurn=now+2000+Math.random()*2200}
       if(hold){if(look){caught++;sBad();prog=lastSafe;hold=false;q('#tlF').className='fb no';q('#tlF').textContent=caught>=3?'被發現了！怪盜X看起來有點累，回頭的速度變慢了。':'被發現了！退回檢查點，看到「？」就要停下來喔。';if(caught>=3){/* gentler */}}
         else{prog=Math.min(100,prog+(caught>=3?.9:.7));[25,50,75].forEach(p=>{if(prog>=p&&lastSafe<p){lastSafe=p;tone([784],.08)}})}}
-      draw();if(prog>=100){clearInterval(loop);sWin();q('#tlF').className='fb ok';q('#tlF').textContent='成功跟到船邊了！';setTimeout(()=>{closeModal();res()},1400)}};
+      draw();if(prog>=100){clearInterval(loop);sWin();q('#tlF').className='fb ok';q('#tlF').textContent='成功跟到船邊了！';lockFor(()=>{closeModal();res()},1400)}};
     const g=q('#tlGo');const on=e=>{e.preventDefault();hold=true},off=()=>{hold=false};
     g.addEventListener('pointerdown',on);g.addEventListener('pointerup',off);g.addEventListener('pointerleave',off);g.addEventListener('pointercancel',off);
     window.__tl={look:()=>look||warn,set:v=>{hold=v},prog:()=>prog};loop=setInterval(tick,50);draw();});})}
