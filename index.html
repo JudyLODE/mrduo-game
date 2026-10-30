@@ -125,11 +125,9 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 .tcard .sub{margin:0 0 16px;font-size:20px;font-weight:900;color:var(--ink2)}
 .tcard label{font-weight:900;font-size:16px;color:var(--ink2)}
 .tcard input{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:22px;font-weight:900;margin:6px 0 14px;padding:10px 14px;border:4px solid var(--line);border-radius:16px;-webkit-user-select:text;user-select:text;color:var(--ink);background:var(--paper2)}
-.lv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.lv button{border:4px solid var(--line);border-radius:18px;padding:10px;text-align:left;background:var(--paper)}
-.lv button b{display:block;font-size:20px}
-.lv button span{font-size:14px;color:var(--ink2);font-weight:700}
-.lv button[aria-pressed="true"]{background:#FFF1C9;box-shadow:inset 0 0 0 3px var(--sun-d)}
+.appbtn{margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:var(--paper2);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-size:15px;font-weight:900;color:var(--ink);min-height:40px}
+.appsteps{margin:0;padding-left:22px;line-height:1.8;font-size:18px}
+.appsteps b{color:var(--grape)}
 .tcard .src{font-size:13px;color:var(--ink2);margin:12px 0 0;line-height:1.6}
 
 /* Chapter card */
@@ -250,17 +248,14 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
     <span class="eyebrow">第一案　消失的台灣三寶</span>
     <h1>偵探<b>多叔</b><br>台灣大搜查</h1>
     <p class="sub">怪盜X寄來了挑戰書！</p>
-    <label for="pname">見習助手的名字</label>
-    <input id="pname" maxlength="6" placeholder="例如：洵洵" autocomplete="off">
-    <div class="lv" role="group" aria-label="難度">
-      <button id="lvE" aria-pressed="true"><b>見習助手</b><span>3 年級</span></button>
-      <button id="lvH" aria-pressed="false"><b>王牌助手</b><span>4–6 年級</span></button>
-    </div>
+    <label for="pname">偵探助手的名字</label>
+    <input id="pname" maxlength="6" placeholder="輸入你的名字" autocomplete="off">
     <div class="row">
       <button class="btn c" id="goBtn">開始辦案</button>
       <button class="btn w" id="resBtn" hidden>從上次的章節繼續</button>
     </div>
-    <p class="src">題目依洵洵的課後輔導進度：國語第三、五課｜數學乘以一位數｜英文職業單字、sm／sn／sw／sl 發音</p>
+    <p class="src">適合國小 4–6 年級｜國語・數學・英文・台灣地理</p>
+    <button class="appbtn" id="appBtn" type="button"><span aria-hidden="true">📲</span> 把遊戲加到主畫面，變成 App</button>
   </div>
 </div>
 
@@ -276,8 +271,8 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 
 /* ================= state ================= */
 const KEY='duoshu-case1-v2';
-let G={name:'',level:'easy',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};
-const hard=()=>G.level==='hard';
+let G={name:'',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};
+const hard=()=>true;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){}}
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||'null');return v&&typeof v.ch==='number'?v:null}catch(e){return null}}
 const fmt=t=>t.replace(/\{n\}/g,G.name||'助手');
@@ -674,7 +669,7 @@ function mapPick(target,done){
   return new Promise(res=>{
     modal(`<div class="card" style="width:min(1000px,100%)"><div class="mgrid" style="align-items:center">
       <svg viewBox="0 0 620 880" style="width:100%;max-height:66vh" id="mapS">${mapSvg(!hard(),done)}</svg>
-      <div><h3>怪盜X會去哪裡？</h3><p class="lead">想想預告信的線索，在地圖上點一個地點。${hard()?'（王牌助手模式：地圖不顯示地名，點了才知道！）':''}</p>
+      <div><h3>怪盜X會去哪裡？</h3><p class="lead">想想預告信的線索，在地圖上點一個地點。（地圖上沒有寫地名，點一點地標就會告訴你是哪裡！）</p>
       <div id="mapInfo" class="story">還沒選地點。</div><div class="row" style="margin-top:12px"><button class="btn c" id="mapGo" disabled>就是這裡！</button></div><div class="fb no" id="mapFb"></div></div></div></div>`,b=>{
       let pick=null;
       b.querySelector('#mapS').onclick=e=>{const g=e.target.closest('.pin');if(!g)return;pick=g.dataset.k;const pl=PLACES[pick];sPop();
@@ -1182,7 +1177,7 @@ function whack(){
     const pop=()=>{if(over)return;const i=Math.floor(Math.random()*WIN.length);const isX=Math.random()<.62;const [x,y]=WIN[i];
       const look=isX?X_LOOK:[CAST.deer.look,CAST.turtle.look,{k:'rabbit',shirt:'#FFB347'}][Math.floor(Math.random()*3)];
       $('#spotL').innerHTML=`<g class="spot" data-id="${isX?'X':'N'}"><g transform="translate(${x} ${y+60}) scale(.85)">${critter(look)}</g><rect class="hit" x="${x-110}" y="${y-160}" width="220" height="240"/></g>`;
-      cur=isX;clearTimeout(timer);timer=setTimeout(()=>{$('#spotL').innerHTML='';setTimeout(pop,300)},hard()?950:1300)};
+      cur=isX;clearTimeout(timer);timer=setTimeout(()=>{$('#spotL').innerHTML='';setTimeout(pop,300)},1100)};
     SC.mode=(id)=>{if(id==='X'){hits++;sGood();upd();$('#spotL').innerHTML='';clearTimeout(timer);
         if(hits>=5){over=true;SC.mode=null;bar.hidden=true;setTimeout(res,400)}else setTimeout(pop,350)}
       else{sBad();toast('哎喲！那是路人啦！');$('#spotL').innerHTML='';clearTimeout(timer);setTimeout(pop,400)}};
@@ -1216,12 +1211,19 @@ async function run(from){
   if(from<=3)await ch3();
   await finale();
 }
-function setLv(l){G.level=l;$('#lvE').setAttribute('aria-pressed',l==='easy');$('#lvH').setAttribute('aria-pressed',l==='hard')}
-$('#lvE').onclick=()=>setLv('easy');$('#lvH').onclick=()=>setLv('hard');
+const standalone=window.navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone),(display-mode: fullscreen)').matches);
+if(standalone)$('#appBtn').hidden=true;
+$('#appBtn').onclick=()=>modal(`<div class="card" style="width:min(560px,100%)"><h3>把遊戲變成 App</h3>
+  <p class="lead">加到主畫面後，點圖示就會全螢幕開始遊戲；打開過一次後，沒有網路也能玩。</p>
+  <p style="margin:0 0 4px;font-weight:900">iPad／iPhone（Safari）</p>
+  <ol class="appsteps"><li>點網址列旁的 <b>分享</b> 按鈕（方框加向上箭頭）</li><li>往下找到 <b>加入主畫面</b></li><li>點右上角 <b>新增</b>，主畫面就會出現多叔的圖示</li></ol>
+  <p style="margin:12px 0 4px;font-weight:900">Android 手機或平板（Chrome）</p>
+  <ol class="appsteps"><li>點右上角 <b>⋮</b> 選單</li><li>選 <b>加到主畫面</b> 或 <b>安裝應用程式</b></li></ol>
+  <div class="row" style="margin-top:14px"><button class="btn" id="appOk">知道了</button></div></div>`,b=>{b.querySelector('#appOk').onclick=closeModal});
 const prev=load();
-if(prev&&prev.ch>=1&&prev.ch<=4){$('#resBtn').hidden=false;$('#resBtn').textContent=`從${['','第一章','第二章','第三章','最終章'][prev.ch]}繼續`;$('#pname').value=prev.name||'';setLv(prev.level||'easy')}
-$('#goBtn').onclick=()=>{const lv=G.level;G={name:$('#pname').value.trim()||'小偵探',level:lv,energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};save();tone([392,523,659],.1);$('#title').hidden=true;run(0)};
-$('#resBtn').onclick=()=>{const lv=G.level;G=Object.assign(G,prev);G.level=lv;G.name=$('#pname').value.trim()||prev.name||'小偵探';$('#title').hidden=true;run(prev.ch)};
+if(prev&&prev.ch>=1&&prev.ch<=4){$('#resBtn').hidden=false;$('#resBtn').textContent=`從${['','第一章','第二章','第三章','最終章'][prev.ch]}繼續`;$('#pname').value=prev.name||''}
+$('#goBtn').onclick=()=>{G={name:$('#pname').value.trim()||'小偵探',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};save();tone([392,523,659],.1);$('#title').hidden=true;run(0)};
+$('#resBtn').onclick=()=>{G=Object.assign(G,prev);G.level='hard';G.name=$('#pname').value.trim()||prev.name||'小偵探';$('#title').hidden=true;run(prev.ch)};
 setScene({id:'office',color:'#BFE9DF',bg:bgOffice,spots:[]});hud();
 })();
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
