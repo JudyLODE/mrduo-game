@@ -1221,9 +1221,9 @@ $('#appBtn').onclick=()=>modal(`<div class="card" style="width:min(560px,100%)">
   <ol class="appsteps"><li>點右上角 <b>⋮</b> 選單</li><li>選 <b>加到主畫面</b> 或 <b>安裝應用程式</b></li></ol>
   <div class="row" style="margin-top:14px"><button class="btn" id="appOk">知道了</button></div></div>`,b=>{b.querySelector('#appOk').onclick=closeModal});
 const prev=load();
-if(prev&&prev.ch>=1&&prev.ch<=4){$('#resBtn').hidden=false;$('#resBtn').textContent=`從${['','第一章','第二章','第三章','最終章'][prev.ch]}繼續`;$('#pname').value=prev.name||''}
+if(prev&&prev.ch>=1&&prev.ch<=4){$('#resBtn').hidden=false;$('#resBtn').textContent=`從${['','第一章','第二章','第三章','最終章'][prev.ch]}繼續`;prev.name=''}
 $('#goBtn').onclick=()=>{G={name:$('#pname').value.trim()||'小偵探',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};save();tone([392,523,659],.1);$('#title').hidden=true;run(0)};
-$('#resBtn').onclick=()=>{G=Object.assign(G,prev);G.level='hard';G.name=$('#pname').value.trim()||prev.name||'小偵探';$('#title').hidden=true;run(prev.ch)};
+$('#resBtn').onclick=()=>{G=Object.assign(G,prev);G.level='hard';G.name=$('#pname').value.trim()||'小偵探';$('#title').hidden=true;run(prev.ch)};
 setScene({id:'office',color:'#BFE9DF',bg:bgOffice,spots:[]});hud();
 })();
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
