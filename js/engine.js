@@ -30,7 +30,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 
 /* ================= state ================= */
-const KEY='duoshu-case1-v3';
+let KEY='duoshu-case1-v3';
 let G={av:{k:'cat',m:'smile'},name:'',level:'hard',energy:5,badges:[],quests:[],clues:[],facts:[],ch:0};
 const hard=()=>true;
 function markDone(id){G.done=G.done||{};const a=G.done[G.ch]=G.done[G.ch]||[];if(!a.includes(id))a.push(id);G.saved=Date.now();save()}
@@ -52,7 +52,7 @@ function shake(el){if(!el)return;el.classList.remove('shake');void el.offsetWidt
 /* ================= HUD ================= */
 function hud(){const hm=document.getElementById('hudMe');if(hm)hm.innerHTML=`<span class="hmh">${avHead()}</span>${G.name||''}`;
   $('#hudHearts').innerHTML='推理力 '+[0,1,2,3,4].map(i=>`<span class="${i<G.energy?'':'off'}">♥</span>`).join('');
-  $('#hudBones').textContent=G.badges.length;
+  $('#hudBones').textContent=G.badges.length;const bt=document.getElementById('hudBonesT');if(bt)bt.textContent=CASE().badges;
 }
 function setCh(t){$('#hudCh').textContent=t}
 
@@ -100,11 +100,15 @@ function critter(o){
     if(E==='long')p=`<ellipse cx="-60" cy="-158" rx="27" ry="12" fill="${f}" transform="rotate(-25 -60 -158)"/><ellipse cx="-60" cy="-158" rx="16" ry="6" fill="#E5D490" transform="rotate(-25 -60 -158)"/>`;
     if(E==='bunny')p=`<ellipse cx="-20" cy="-212" rx="13" ry="40" fill="${f}"/><ellipse cx="-20" cy="-210" rx="6" ry="28" fill="#F4D0D8"/>`;
     if(E==='pig')p=`<path d="M-44 -168 L-34 -196 L-18 -176Z" fill="${d}"/>`;
+    if(E==='stalk')p=`<line x1="-22" y1="-176" x2="-28" y2="-212" stroke="${d}" stroke-width="7" stroke-linecap="round"/><circle cx="-28" cy="-216" r="11" fill="#FFFFFF" stroke="${ink}" stroke-width="3"/><circle cx="-27" cy="-215" r="5" fill="${ink}"/>`;
+    if(E==='horn')p=`<path d="M-30 -176 Q-40 -214 -22 -224 Q-30 -200 -18 -180Z" fill="#3A332E"/><ellipse cx="-52" cy="-160" rx="16" ry="9" fill="${f}" transform="rotate(-20 -52 -160)"/>`;
     if(E==='side')p=`<ellipse cx="-54" cy="-136" rx="13" ry="17" fill="${K.wool?'#EFE0D7':m||d}"/>`;
     return l?p:`<g transform="scale(-1 1)">${p}</g>`};
   s+=ear(1)+ear(0);
   if(K.wool)s+=[[-40,-170],[-14,-184],[14,-184],[40,-170],[-50,-140],[50,-140]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="20" fill="#FFFFFF" stroke="#E8E6EC" stroke-width="2"/>`).join('');
   s+=`<ellipse cx="0" cy="-138" rx="53" ry="49" fill="${f}"/>`;
+  if(K.crest)s+=`<path d="M-6 -184 Q-2 -214 22 -222 Q8 -202 12 -184Z" fill="${K.crest}"/>`;
+  if(K.wattle)s+=`<ellipse cx="-20" cy="-140" rx="17" ry="14" fill="#C8464A"/><ellipse cx="20" cy="-140" rx="17" ry="14" fill="#C8464A"/>`;
   if(K.wool)s+=`<circle cx="0" cy="-182" r="22" fill="#FFFFFF" stroke="#E8E6EC" stroke-width="2"/>`;
   if(K.face)s+=`<ellipse cx="0" cy="-128" rx="40" ry="33" fill="${m}"/>`;
   if(K.stripes)s+=`<path d="M-9 -182 Q-12 -164 -14 -152 M9 -182 Q12 -164 14 -152" stroke="#FAF4EB" stroke-width="5" stroke-linecap="round" fill="none"/>`;
@@ -123,6 +127,7 @@ function critter(o){
   s+=`<ellipse cx="-35" cy="-118" rx="10" ry="6" fill="#ECADB8" opacity=".55"/><ellipse cx="35" cy="-118" rx="10" ry="6" fill="#ECADB8" opacity=".55"/>`;
   const mouth=K.mood==='grin'?`<path d="M-12 -113 Q0 -92 12 -113Z" fill="#8E3B3B" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`:K.mood==='o'?`<ellipse cx="0" cy="-106" rx="6" ry="7" fill="${ink}"/>`:K.mood==='sad'?`<path d="M-8 -104 Q0 -112 8 -104" stroke="${ink}" stroke-width="3" fill="none" stroke-linecap="round"/>`:`<path d="M-9 -112 Q-4.5 -105 0 -112 Q4.5 -105 9 -112" stroke="${ink}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
   if(K.beak)s+=`<path d="M-13 -126 L13 -126 L0 -102Z" fill="${K.beak}"/>`;
+  else if(K.rostrum)s+=`<path d="M-20 -122 Q0 -132 20 -122 Q34 -108 0 -98 Q-34 -108 -20 -122Z" fill="${shade(f,-10)}"/><path d="M-10 -106 Q0 -100 10 -106" stroke="${ink}" stroke-width="3" fill="none"/>`;
   else if(K.bignose)s+=`<ellipse cx="0" cy="-122" rx="13" ry="17" fill="#39383F"/><path d="M-6 -100 Q0 -96 6 -100" stroke="${ink}" stroke-width="3" fill="none"/>`;
   else if(K.snout)s+=`<ellipse cx="0" cy="-118" rx="17" ry="12" fill="${shade(f,-12)}"/><ellipse cx="-6" cy="-118" rx="3" ry="4" fill="${ink}"/><ellipse cx="6" cy="-118" rx="3" ry="4" fill="${ink}"/>`+mouth.replace(/-112/g,'-102').replace(/-105/g,'-96');
   else if(m)s+=`<ellipse cx="0" cy="-116" rx="23" ry="16" fill="${m}"/><ellipse cx="0" cy="-124" rx="7.5" ry="5.5" fill="${ink}"/>`+mouth;
@@ -277,7 +282,7 @@ $('#scene').addEventListener('click',async e=>{
   try{
     if(id==='__duo')await duoHint();
     else{const sp=spot(id);
-      if(sp.type==='badge'){sp.got=true;if(!G.badges.includes(sp.bid)){G.badges.push(sp.bid);save()}hud();sWin();toast('找到骨頭徽章！（'+G.badges.length+'/9）');drawSpots()}
+      if(sp.type==='badge'){sp.got=true;if(!G.badges.includes(sp.bid)){G.badges.push(sp.bid);save()}hud();sWin();toast('找到骨頭徽章！（'+G.badges.length+'/'+CASE().badges+'）');drawSpots()}
       else if(sp.tap){CAM.subject=sp.id;await duoGo(sp);await sp.tap(sp);hideDlg()}
     }
   }finally{busy=false;CAM.subject=null;drawSpots();checkInv()}

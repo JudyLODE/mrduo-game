@@ -310,7 +310,7 @@ function seq(title,lead,items){return new Promise(res=>{let picked=[];
 
 /* evidence card with stamp */
 function evidence(title,text){return new Promise(res=>{const n=(SC.evN=(SC.evN||0)+1),tot=SC.spots.filter(s=>s.need).length;G.ev=G.ev||[];if(!G.ev.some(e=>e.ch===G.ch&&e.t===title))G.ev.push({ch:G.ch,n,t:title,x:text});
-  const t=`${G.ch?['','101','日月潭','安平'][G.ch]:''}證物 #${n}　${title}：${text}`;if(!G.clues.includes(t)){G.clues.push(t);save()}sWin();
+  const t=`${G.ch?CASE().short[G.ch]:''}證物 #${n}　${title}：${text}`;if(!G.clues.includes(t)){G.clues.push(t);save()}sWin();
   modal(`<div class="card evid" style="width:min(580px,100%)"><div class="stampE">證物 #${String(n).padStart(2,'0')}</div><div class="evtag">破案進度 ${n}/${tot}</div><h3>${title}</h3><p class="lead" style="font-size:20px">${text}</p><div class="row"><button class="btn c" id="evOk">收進偵探筆記</button></div></div>`,b=>{b.querySelector('#evOk').onclick=()=>{closeModal();res()}})})}
 
 /* puzzle hotspot factory */
@@ -469,22 +469,22 @@ function tailGame(){return new Promise(res=>{let prog=0,look=0,warn=false,hold=f
 
 /* ================= notebook ================= */
 const FEATS=[['戴眼鏡',/眼鏡/],['紅色帽子',/紅帽子|紅色的帽子|red hat/],['圓形包包',/圓形的包包|圓包包/],['是一隻狐狸',/狐狸/]];
-function clueBoard(go){return new Promise(res=>{const ev=G.ev||[];let tab=Math.min(Math.max(G.ch||1,1),3);
-  const all=ev.map(e=>e.t+e.x).join(' ')+G.clues.join(' ');const got=FEATS.filter(f=>f[1].test(all));
-  modal2(`<div class="card board" style="width:min(1000px,100%)"><div class="boardtop"><span class="tape">怪盜X 線索板</span><div class="btabs">${['','台北101','日月潭','安平古堡'].map((t,i)=>i?`<button data-t="${i}">${t}</button>`:'').join('')}</div></div>
+function clueBoard(go){return new Promise(res=>{const ev=G.ev||[];let tab=Math.min(Math.max(G.ch||1,1),CASE().inv[1]);
+  const all=ev.map(e=>e.t+e.x).join(' ')+G.clues.join(' ');const got=CASE().feats().filter(f=>f[1].test(all));
+  modal2(`<div class="card board" style="width:min(1000px,100%)"><div class="boardtop"><span class="tape">怪盜X 線索板</span><div class="btabs">${CASE().tabs.map((t,i)=>i?`<button data-t="${i}">${t}</button>`:'').join('')}</div></div>
     <div class="boardbody"><div class="suspect"><div class="sil">${head(X_LOOK)}<b>？</b></div><div class="feat">${got.length?got.map(f=>`<span>${f[0]}</span>`).join(''):'<em>還沒有找到特徵</em>'}</div></div><div class="cards" id="bc"></div></div>
     <div class="banner"><b>怪盜X的特徵：</b>${got.length?got.map(f=>f[0]).join('、'):'繼續調查，把線索找出來！'}</div>
-    <div class="row" style="justify-content:space-between;margin-top:12px"><div class="small">骨頭徽章 ${G.badges.length}/9　幫忙任務 ${G.quests.length}/2</div><div class="row">${go?'':'<button class="btn w" id="nbHome">回封面</button>'}<button class="btn ${go?'c':''}" id="nbOk">${go?'開始推理！':'關閉'}</button></div></div></div>`,b=>{
+    <div class="row" style="justify-content:space-between;margin-top:12px"><div class="small">骨頭徽章 ${G.badges.length}/${CASE().badges}　幫忙任務 ${G.quests.length}/${CASE().quests}</div><div class="row">${go?'':'<button class="btn w" id="nbHome">回封面</button>'}<button class="btn ${go?'c':''}" id="nbOk">${go?'開始推理！':'關閉'}</button></div></div></div>`,b=>{
     function draw(){b.querySelectorAll('.btabs button').forEach(x=>x.className=+x.dataset.t===tab?'on':'');
       const list=ev.filter(e=>e.ch===tab);b.querySelector('#bc').innerHTML=list.length?list.map((e,k)=>`<div class="ecard" style="transform:rotate(${(k%3-1)*1.6}deg)"><i></i><small>證物 #${String(e.n).padStart(2,'0')}</small><b>${e.t}</b><p>${e.x}</p></div>`).join(''):'<p class="nocard">這裡還沒有證物。到現場調查，找到的證物會釘在這裡。</p>'}
     b.querySelector('.btabs').onclick=e=>{const x=e.target.closest('button');if(!x)return;tab=+x.dataset.t;sPop();draw()};
     b.querySelector('#nbOk').onclick=()=>{closeModal2();res()};const h=b.querySelector('#nbHome');if(h)h.onclick=()=>location.reload();draw()});})}
 $('#nbBtn').onclick=()=>{if(!$('#modal2').hidden)return;clueBoard(false)};
 $('#pauseBtn').onclick=()=>{if(!$('#modal2').hidden||!$('#title').hidden)return;save();sPop();
-  const dn=((G.done||{})[G.ch]||[]).length,chn=['序章','第一章','第二章','第三章','最終章','結局'][G.ch]||'';
+  const dn=((G.done||{})[G.ch]||[]).length,chn=CASE().chn[G.ch]||'';
   modal2(`<div class="card pausecard" style="width:min(520px,100%)"><h3>暫停休息一下</h3>
-    <div class="savebox"><span class="saveicon">✔</span><div><b>進度已經自動存好了</b><small>${chn}${G.ch>=1&&G.ch<=3?`・已破解 ${dn} 關`:''}・推理力 ${G.energy}・骨頭徽章 ${G.badges.length}</small></div></div>
-    <p class="lead">下次打開遊戲，在首頁按「繼續上次的冒險」，就會回到這一章，已經破解的關卡不用再玩一次。</p>
+    <div class="savebox"><span class="saveicon">✔</span><div><b>進度已經自動存好了</b><small>${chn}${G.ch>=CASE().inv[0]&&G.ch<=CASE().inv[1]?`・已破解 ${dn} 關`:''}・推理力 ${G.energy}・骨頭徽章 ${G.badges.length}</small></div></div>
+    <p class="lead">下次打開遊戲，在首頁打開「案件簿」按「繼續辦案」，就會回到這一章，已經破解的關卡不用再玩一次。</p>
     <div class="row" style="justify-content:flex-end;gap:10px"><button class="btn w" id="pzHome">存檔並回到首頁</button><button class="btn c" id="pzGo">繼續玩</button></div></div>`,b=>{
     b.querySelector('#pzGo').onclick=()=>closeModal2();
     b.querySelector('#pzHome').onclick=()=>{save();location.reload()}})};

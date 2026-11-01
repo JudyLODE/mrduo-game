@@ -1,4 +1,4 @@
-"""自動把整個遊戲玩一遍（第一案），印出 FINISHED 代表全部關卡都能過。
+"""自動把整個遊戲玩一遍（CASE=1 第一案，CASE=2 第二案），印出 FINISHED 代表全部關卡都能過。
 用法：python3 tools/bundle.py && python3 tests/testbuild.py && python3 tests/autoplay.py
 環境變數 ROUND=1 可測第二套題目。截圖存在 tests/out/。"""
 import asyncio,json,time,os
@@ -13,7 +13,12 @@ async def main():
 
     if os.environ.get('ROUND'):
       await pg.evaluate("localStorage.setItem('duoshu-meta',JSON.stringify({clears:%s}))"%os.environ['ROUND']);await pg.reload();await pg.wait_for_timeout(500);await pg.screenshot(path=os.path.join(OUT,'r_title.png'))
-    await pg.fill('#pname','測試');await pg.click('#goBtn');await pg.wait_for_timeout(2500)
+    CASE=int(os.environ.get('CASE','1'))
+    if CASE>1:
+      await pg.evaluate("localStorage.setItem('duoshu-meta',JSON.stringify({clears:1}))");await pg.reload();await pg.wait_for_timeout(500)
+    await pg.fill('#pname','測試');await pg.click('#goBtn');await pg.wait_for_timeout(600)
+    await pg.screenshot(path=os.path.join(OUT,'casebook.png'))
+    await pg.click(f'.cbook[data-n="{CASE}"] [data-go]');await pg.wait_for_timeout(2500)
     ev=lambda js:pg.evaluate(js)
     async def shot(key):
       if key in SHOTS:return
@@ -29,6 +34,10 @@ async def main():
     t0=time.time();last=''
     for step in range(4000):
       if time.time()-t0>900:print('TIMEOUT');break
+      if await pg.query_selector('#soonOk'):await shot('soon');print('FINISHED (case %d, reached 未完待續) at step'%CASE,step);break
+      if await ev("!!window.__solve") and await vis('#modal'):
+        nm=await ev("(document.querySelector('#mBody h3')||{}).textContent||'g2'")
+        await pg.wait_for_timeout(700);await shot('g2_'+nm[:12]);await ev("window.__solve()");await pg.wait_for_timeout(2300);continue
       if await pg.query_selector('.cert'):await shot('cert');print('FINISHED at step',step);break
       if await pg.query_selector('.chap'):await pg.click('.chap');await pg.wait_for_timeout(200);continue
       if await pg.query_selector('.cut'):await shot('cut'+str(step//50));await pg.click('.cut');await pg.wait_for_timeout(300);continue
@@ -172,7 +181,7 @@ async def main():
         nd=await ev("__T.SC().spots.filter(s=>s.need&&s.done).length")
         if nd>=3:
           PEEKED['save']=nd;await click('#pauseBtn');await pg.wait_for_timeout(400);await shot('pause');await click('#pzHome');await pg.wait_for_timeout(1500)
-          await shot('title_resume');await click('#resBtn');await pg.wait_for_timeout(1500);continue
+          await click('#goBtn');await pg.wait_for_timeout(600);await shot('title_resume');await click('.cbook[data-n="1"] [data-go="res"]');await pg.wait_for_timeout(1500);continue
       if PEEKED.get('save') and not PEEKED.get('chk') and st['inv'] and key=='obs':
         nd=await ev("__T.SC().spots.filter(s=>s.need&&s.done).length");PEEKED['chk']=1;print('RESUME CHECK saved',PEEKED['save'],'restored',nd,flush=True)
       if st['inv']:

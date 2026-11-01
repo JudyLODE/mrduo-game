@@ -22,7 +22,7 @@
     <div class="ch" id="hudCh">偵探多叔事務所</div>
     <div class="pill hudme" id="hudMe"></div>
     <div class="pill hearts" id="hudHearts" title="推理力"></div>
-    <div class="pill"><span class="bone" aria-hidden="true"></span>&nbsp;<span id="hudBones">0</span>/9</div>
+    <div class="pill"><span class="bone" aria-hidden="true"></span>&nbsp;<span id="hudBones">0</span>/<span id="hudBonesT">9</span></div>
     <button class="hbtn" id="nbBtn">線索板</button>
     <button class="hbtn w" id="pauseBtn" title="存檔／離開">暫停</button>
   </div>
@@ -47,7 +47,7 @@
   <svg class="clouds" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g transform="translate(1390 760) rotate(-18)" fill="none" stroke="#DCCBA4" stroke-width="22" stroke-linecap="round"><circle r="120"/><path d="M86 86 L210 210"/></g><text x="120" y="250" font-size="300" font-weight="900" fill="#BFD0DF" transform="rotate(-12 120 250)" font-family="Fredoka,sans-serif">?</text></svg>
   <img class="hero" id="heroImg" alt="偵探多叔">
   <div class="tcard">
-    <span class="eyebrow">第一案　消失的台灣三寶</span>
+    <span class="eyebrow">偵探案件簿</span>
     <h1>偵探<b>多叔</b><br><i>台灣</i>大搜查</h1>
     <div class="tstripe" aria-hidden="true"><span style="background:#C86062"></span><span style="background:#D4BB49"></span><span style="background:#2B79B5"></span><span style="background:#8DB36E"></span></div>
     <p class="sub">怪盜X寄來了挑戰書！</p>
@@ -55,7 +55,7 @@
     <input id="pname" maxlength="6" placeholder="輸入你的名字" autocomplete="off">
     <div class="avbox"><div class="avprev" id="avPrev" aria-label="你的角色"></div><div><button type="button" class="btn w" id="avEdit" style="min-height:48px;font-size:18px;padding:6px 16px">設計我的角色</button></div></div>
     <div class="row">
-      <button class="btn c" id="goBtn">開始辦案</button>
+      <button class="btn c" id="goBtn">打開案件簿</button>
       <button class="btn w" id="resBtn" hidden>從上次的章節繼續</button>
     </div>
     <button class="appbtn" id="appBtn" type="button"><span aria-hidden="true">📲</span> 把遊戲加到主畫面，變成 App</button>
@@ -72,6 +72,10 @@
 <script src="js/scenes.js"></script>
 <script src="js/minigames.js"></script>
 <script src="js/case1.js"></script>
+<script src="js/cases.js"></script>
+<script src="js/scenes2.js"></script>
+<script src="js/minigames2.js"></script>
+<script src="js/case2.js"></script>
 <script src="js/main.js"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
 </body>

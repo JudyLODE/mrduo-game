@@ -29,19 +29,23 @@ js/engine.js          核心：狀態 G、存檔、音效、朗讀、角色繪�
 js/scenes.js          第一案場景背景、台灣地圖 PLACES/mapPick/travel、預告信
 js/minigames.js       小遊戲元件、過場 cutscene、委託卡、決勝特寫、章節結算、線索板、暫停
 js/case1.js           第一案劇本、關卡、題目（含第二套題目 ALTS）、結局
-js/main.js            開機：首頁、角色設計、開始／繼續（一定最後載入）
+js/cases.js           案件系統：CASES 設定（存檔 key、章名、線索板分頁、特徵）、案件簿 caseBook()、startCase()
+js/scenes2.js         第二案：新動物種類、新角色 CAST、地圖新地點、五個場景背景
+js/minigames2.js      第二案的新玩法元件（g2() 視窗、api.ok/no/solve），和第一案不重複
+js/case2.js           第二案劇本（目前：開場、序章、第一章野柳）＋第二套題目 ALTS2
+js/main.js            開機：首頁、角色設計、「打開案件簿」（一定最後載入）
 assets/duo/*.webp     遊戲用的多叔圖片（由 tools/art/export_duo.py 產生，不要手改）
 art-src/duo/*.webp    多叔去背原圖（高解析、無損），要重新輸出圖片時用
 tools/bundle.py       打包成單一 HTML（Claude artifact 預覽與測試用）
 tools/release.py      發布前更新 sw.js 版本號與離線檔案清單
 tools/art/            去背與輸出圖片的工具
 tests/                自動試玩測試
-wip/                  還沒接進遊戲的草稿（例如第二案）
 ```
 
 所有 js 都是**一般 script（不是 module）**，在同一個全域範圍，所以載入順序很重要：
-`assets → engine → scenes → minigames → case1 →（之後的 case2…）→ main`。
-新案件請新增 `js/case2.js` 並在 `index.html` 的 `main.js` 前面加一行 `<script>`。
+`assets → engine → scenes → minigames → case1 → cases → scenes2 → minigames2 → case2 → main`。
+新案件：在 `js/cases.js` 的 `CASES` 加一筆，新增 `js/caseN.js`（寫 `runN(from)`），在 `startCase()` 加上呼叫，並在 `index.html` 的 `main.js` 前面加 `<script>`。
+目前案件由 `CUR`／`CASE()` 決定；`KEY`（存檔）與 `ROUTE`（地圖路線）由 `useCase(n)` 切換。
 
 ## 4. 風格規範（使用者明確要求過的）
 
@@ -94,6 +98,8 @@ pz('bear', 1330, 930, {
 4. 答錯不懲罰、沒有「失敗結束」；給分層提示（先提醒、再指出位置、最後示範一半）。
 5. 計時類遊戲時間到不會失敗，只是不給額外星星；連續失敗兩次要自動降低難度。
 6. 為了自動測試，每個新玩法要提供「解題掛勾」：`window.__solve=()=>{...}`，讓測試程式能自動完成它。
+7. 第二案的新玩法請用 `js/minigames2.js` 的 `g2(標題, 多叔表情, html, api=>{...})`：過關 `api.ok(訊息)`（內建連點鎖與關窗）、答錯 `api.no(提示)`、`api.solve(fn)` 設定解題掛勾。範例：`sortBaskets`、`coinPay`。
+8. 第二案關卡用 `pz2()`（會自動套用 `ALTS2` 第二套題目），id 用章節前綴：野柳 `y_`、九份 `j_`、太魯閣 `t_`、鹿野 `l_`、墾丁 `k_`。
 
 ### 常用流程元件
 `chapterCard(小標,大標,副標)`、`caseCard(no,標題,目標,地點)`、`openingCut()`/`cutscene(panels)`、`finisher('決勝台詞')`、`chapterResult(no,標題)`、`clueBoard(true)`、`mapPick(地點key, 已完成數)`、`travel(from,to)`、`letter(i)`、`actorIn/actorOut`。
@@ -106,7 +112,8 @@ pz('bear', 1330, 930, {
 python3 tools/bundle.py                 # 打包成 dist/bundle.html
 python3 tests/testbuild.py              # 加測試掛勾 → tests/out/t.html
 python3 tests/autoplay.py               # 自動玩完第一案，最後要看到 FINISHED 和 errors: []
-ROUND=1 python3 tests/autoplay.py       # 測第二套題目
+ROUND=1 python3 tests/autoplay.py       # 測第一案第二套題目
+CASE=2 python3 tests/autoplay.py        # 自動玩第二案（目前玩到「未完待續」就算完成）
 ```
 截圖會存在 `tests/out/`，改了畫面要打開看。只想在瀏覽器試玩：`python3 -m http.server 8000` 後開 http://localhost:8000 。
 

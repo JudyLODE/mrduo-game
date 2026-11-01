@@ -317,3 +317,54 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
   .hud .ch{font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== 案件簿 ===== */
+.cbooks{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.cbook{position:relative;background:var(--paper2);border:4px solid var(--line);border-radius:18px;padding:16px;min-height:200px;display:flex;flex-direction:column;gap:6px}
+.cbook b{font-size:24px}.cbook p{margin:0;color:var(--ink2);line-height:1.5}.cbook .row{margin-top:auto}
+.cbnum{display:inline-block;align-self:flex-start;background:var(--theme);color:#fff;border-radius:999px;padding:2px 14px;font-weight:900}
+.cbook.lock{opacity:.6}.cbook.soon{border-style:dashed;background:#FFFFFF}
+.cbwip{font-size:15px;background:#FFF6D8;border-radius:10px;padding:4px 8px}
+.cbstamp{position:absolute;right:14px;top:12px;border:4px solid var(--coral);color:var(--coral);border-radius:10px;padding:0 10px;font-weight:900;transform:rotate(8deg)}
+.cbstamp.ok{border-color:var(--teal);color:var(--teal)}
+/* ===== 第二案小遊戲共用 ===== */
+.ico{display:inline-block;line-height:1}
+.mirwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.mirletter,.mirslot{background:#F4EEF8;border:4px solid var(--line);border-radius:14px;padding:16px;min-height:220px;font-size:19px;line-height:1.8}
+.mirslot{display:grid;place-items:center;border-style:dashed;background:#FFFFFF;color:var(--ink2)}
+.mirwrap.on .mirslot{border-style:solid;background:#E7F0F6;place-items:start;color:var(--ink)}
+.mirtext.rev{transform:scaleX(-1)}.mirtext.rev.flip{transform:scale(-1,-1)}
+.kw{background:#FFF6D8;border:2px dashed var(--grape);border-radius:8px;padding:0 4px;font-weight:900}.kw.got{background:#D3E4C7;border-style:solid}
+.sdwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sdwrap small{font-weight:900;color:var(--ink2)}
+.sdwrap svg{border:4px solid var(--line);border-radius:12px}
+.blink{animation:blink 1s infinite}@keyframes blink{50%{opacity:.1}}
+.tsgrid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.tslines{display:grid;gap:10px}.tsl{display:flex;gap:10px;align-items:center;text-align:left;background:var(--paper2);border:3px solid var(--line);border-radius:16px;padding:8px 12px;font-size:19px;font-weight:700}
+.tsl small{display:block;color:var(--ink2);font-size:14px}.tsw{width:64px;height:64px;flex:none}.tsw svg{width:100%;height:100%}
+.tsl.hint{background:#FFF6D8;animation:blink 1.2s 3}.tsl.lie{background:#F6D3D3;border-color:var(--coral)}
+.tscards{display:grid;gap:10px;align-content:start}.tsc{display:flex;gap:8px;align-items:center;background:#FFFFFF;border:3px solid var(--line);border-radius:14px;padding:8px 12px;font-size:17px;box-shadow:0 4px 0 var(--line)}
+.tsc.on{background:#D3E4C7;transform:translateY(2px);box-shadow:0 2px 0 var(--line)}
+.labstep{background:var(--paper2);border-left:8px solid var(--theme);border-radius:10px;padding:8px 14px;font-size:19px;margin-bottom:10px}.labstep small{display:block;color:var(--ink2);font-size:15px}
+.labgrid{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:center}
+.labtray{display:flex;flex-wrap:wrap;gap:8px;align-content:center}
+.labitem{display:flex;flex-direction:column;align-items:center;gap:2px;background:#FFFFFF;border:3px solid var(--line);border-radius:14px;padding:6px 10px;min-width:84px;font-weight:900;box-shadow:0 4px 0 var(--line)}
+.labitem.on{background:#FFF6D8;transform:translateY(2px);box-shadow:0 2px 0 var(--line)}
+.bub{animation:bub 1.4s infinite ease-in}@keyframes bub{to{transform:translateY(-90px);opacity:0}}
+.hxpad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.hxpad button{background:#FFFFFF;border:3px solid var(--line);border-radius:12px;min-height:54px;font:700 26px var(--f-en);box-shadow:0 3px 0 var(--line)}
+.wsg{display:grid;gap:4px}.wsg button{aspect-ratio:1;background:#F7F0E1;border:3px solid var(--line);border-radius:10px;font:700 24px var(--f-en)}
+.wsg button.sel{background:#FFF6D8}.wsg button.got{background:#D3E4C7}
+.wsw{display:flex;flex-wrap:wrap;gap:8px}.wsw span{background:#FFFFFF;border:3px solid var(--line);border-radius:999px;padding:4px 12px;font:700 20px var(--f-en)}.wsw span small{font:700 14px var(--f-ui);color:var(--ink2)}.wsw span.got{background:#D3E4C7;text-decoration:line-through}
+.sbitems{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:12px}
+.sbit{display:flex;flex-direction:column;align-items:center;background:#FFFFFF;border:3px solid var(--line);border-radius:16px;padding:8px 12px;min-width:90px;font-weight:900;box-shadow:0 4px 0 var(--line)}
+.sbit.on{background:#FFF6D8;transform:translateY(2px)}.sbit:disabled{opacity:.25}
+.sbbaskets{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.sbb{background:var(--paper2);border:4px dashed var(--line);border-radius:18px;padding:12px;min-height:120px;cursor:pointer}.sbb b{display:block;margin-bottom:6px}
+.cptray{min-height:86px;background:#F7F0E1;border:4px dashed var(--line);border-radius:16px;padding:10px;margin:10px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cpcoins{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.cpcoins button,.cptray button{width:70px;height:70px;border-radius:50%;background:var(--c);border:4px solid var(--line);font:700 22px var(--f-en);box-shadow:0 4px 0 var(--line)}
+.cpcoins button.bill,.cptray button.bill{width:110px;height:62px;border-radius:10px}
+.cptray button{width:56px;height:56px;font-size:18px}.cptray button.bill{width:88px;height:50px}
+.silbox{background:#E6EEF2;border:4px solid var(--line);border-radius:16px;overflow:hidden}.silbox svg{width:100%;display:block}
+.silbox.part{outline:6px solid #E8E19E}
+.sichoice{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.sichoice button{display:flex;flex-direction:column;align-items:center;gap:4px;background:#FFFFFF;border:3px solid var(--line);border-radius:16px;padding:10px;font-size:18px;box-shadow:0 4px 0 var(--line)}
+@media (max-width:760px){.mirwrap,.sdwrap,.tsgrid,.labgrid{grid-template-columns:1fr}}
