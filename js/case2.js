@@ -146,13 +146,30 @@ async function c2ch1(){
   G.ch=2;save();
 }
 
-/* ================= 執行 ================= */
+/* ================= 執行 =================
+   每一章是一個 async 函式，結尾要寫 G.ch=下一章;save();
+   第二章以後放在獨立檔案 js/case2_chN.js，用 C2_CH[N]=函式 註冊（見 docs/KIMI.md）。 */
+const C2_CH={1:c2ch1};
+const C2_NAMES={2:'九份：會變色的芋圓湯',3:'太魯閣：會呼吸的石頭',4:'鹿野高台：自己長大的氣球',5:'墾丁：會發光的腳印'};
 async function run2(from){
   AV={...(G.av||AV)};hud();DUO.coat=from>=1;
   if(from<=0){await c2Opening();await c2Prologue()}
-  if(from<=1)await c2ch1();
-  await c2Soon();
+  for(let n=Math.max(1,from);n<=5;n++){if(!C2_CH[n]){await c2Soon(n);return}DUO.coat=true;await C2_CH[n]()}
+  c2Ending();
 }
-function c2Soon(){return new Promise(()=>{setCh('未完待續');
-  modal(`<div class="card" style="width:min(600px,100%);text-align:center"><h3>未完待續……</h3><img src="${COAT.coat_tip.b}" alt="" style="height:180px"><p class="lead">第二章「九份：會變色的芋圓湯」還在製作中。<br>你的進度已經存好了，下次打開案件簿，就能從這裡繼續！</p>
+function c2Soon(n){return new Promise(()=>{setCh('未完待續');
+  modal(`<div class="card" style="width:min(600px,100%);text-align:center"><h3>未完待續……</h3><img src="${COAT.coat_tip.b}" alt="" style="height:180px"><p class="lead">下一章「${C2_NAMES[n]||'新的章節'}」還在製作中。<br>你的進度已經存好了，下次打開案件簿，就能從這裡繼續！</p>
     <button class="btn c" id="soonOk">回到首頁</button></div>`,b=>{b.querySelector('#soonOk').onclick=()=>location.reload()})})}
+/* 第二案結局（最終章結束後呼叫）：記錄破案次數、頒證書、預告第三案 */
+function c2Ending(){if(!G.counted){G.counted=1;const m=meta();m.c2=(m.c2||0)+1;setMeta(m)}G.ch=6;save();
+  setCh('第二案　破案成功！');const stars=G.energy>=5?3:G.energy>=3?2:1,cards=(G.ev||[]).filter(e=>/化學魔法卡/.test(e.t)).length;
+  modal(`<div class="card cert" style="width:min(720px,100%)">
+    <div style="display:flex;justify-content:center;align-items:flex-end;gap:10px"><img src="${COAT.coat_front.b}" alt="偵探多叔" style="height:190px;display:block"><div style="width:120px;height:120px">${avHead()}</div><div style="width:110px;height:110px">${head(CAST.pango2.look)}</div></div>
+    <div style="letter-spacing:6px;font-weight:900;color:var(--ink2)">第二案　破案證書</div>
+    <h3 style="font-size:36px;margin:6px 0">${fmt('{n}')} 偵探助手</h3>
+    <p class="lead" style="margin:0">和偵探多叔、小穿山甲一起，用科學拆穿了魔術師怪盜X的五個魔術，把寶物全部找回來了！${cards>=5?'<br><b>獲得稱號：小化學家</b>':''}</p>
+    <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+    <div class="stats"><div><b>${G.energy}/5</b>推理力</div><div><b>${G.badges.length}/15</b>骨頭徽章</div><div><b>${G.quests.length}/5</b>幫忙任務</div><div><b>${cards}</b>化學魔法卡</div></div>
+    <div class="story" style="text-align:left">${CASES[3].teaser}</div>
+    <p class="lead" style="margin:10px 0 0">再辦一次第二案的話，學科題目會換成新的喔！</p>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn c" id="c2Home">回到案件簿</button></div></div>`,b=>{b.querySelector('#c2Home').onclick=()=>location.reload()})}

@@ -32,7 +32,8 @@ js/case1.js           第一案劇本、關卡、題目（含第二套題目 ALT
 js/cases.js           案件系統：CASES 設定（存檔 key、章名、線索板分頁、特徵）、案件簿 caseBook()、startCase()
 js/scenes2.js         第二案：新動物種類、新角色 CAST、地圖新地點、五個場景背景
 js/minigames2.js      第二案的新玩法元件（g2() 視窗、api.ok/no/solve），和第一案不重複
-js/case2.js           第二案劇本（目前：開場、序章、第一章野柳）＋第二套題目 ALTS2
+js/case2.js           第二案：開場、序章、第一章野柳、章節登錄 C2_CH、未完待續、結局 c2Ending()、第二套題目 ALTS2
+js/case2_chN.js       第二案第 N 章（之後新增，用 C2_CH[N]=c2chN 註冊；做法見 docs/KIMI.md）
 js/main.js            開機：首頁、角色設計、「打開案件簿」（一定最後載入）
 assets/duo/*.webp     遊戲用的多叔圖片（由 tools/art/export_duo.py 產生，不要手改）
 art-src/duo/*.webp    多叔去背原圖（高解析、無損），要重新輸出圖片時用
@@ -40,6 +41,7 @@ tools/bundle.py       打包成單一 HTML（Claude artifact 預覽與測試用�
 tools/release.py      發布前更新 sw.js 版本號與離線檔案清單
 tools/art/            去背與輸出圖片的工具
 tests/                自動試玩測試
+docs/KIMI.md          給 Kimi 的接手說明：第二案剩下章節怎麼做
 ```
 
 所有 js 都是**一般 script（不是 module）**，在同一個全域範圍，所以載入順序很重要：
