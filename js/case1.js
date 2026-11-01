@@ -121,7 +121,7 @@ const ALTS_SRC=()=>({
       {q:'圖中的影子又長又指向東邊，太陽在哪一邊？',pic:shadowSvg(true),o:['西邊','東邊','正上方'],ex:'影子指向東邊，太陽就在相反的西邊，而且很低。'}])},
   compass:{run:()=>quiz('指北針與磁鐵',[
       {q:'指北針藍色的 S 極，會指向哪個方位？',pic:`<div style="display:flex;justify-content:center"><svg viewBox="-60 -60 120 120" width="150" height="150"><circle r="54" fill="#FFFFFF" stroke="${INK}" stroke-width="5"/><path d="M0 -44 L10 0 L-10 0Z" fill="#C86062"/><path d="M0 44 L10 0 L-10 0Z" fill="#2B79B5"/></svg></div>`,o:['南方','北方','西方'],ex:'N 極指北，S 極就指向相反的南方。'},
-      {q:'一塊磁鐵的 N 極，靠近另一塊磁鐵的 S 極，會怎麼樣？',pic:magnetSvg(),o:['互相吸引','互相排斥（推開）','沒有反應'],ex:'異極相吸，同極相斥。'},
+      {q:'一塊磁鐵的 N 極，靠近另一塊磁鐵的 S 極，會怎麼樣？',pic:magnetSvg('ns'),o:['互相吸引','互相排斥（推開）','沒有反應'],ex:'異極相吸，同極相斥。'},
       {q:'面向北方站好，你的右手邊是哪個方位？',o:['東方','西方','南方'],ex:'面向北方時，右手是東、左手是西、背後是南。'}])}
 });
 let ALTS_C=null;const ALTS=()=>ALTS_C||(ALTS_C=ALTS_SRC());
@@ -427,7 +427,7 @@ async function ch3(){
       intro:[['duo','有了指北針，就知道怪盜X往哪個方向逃。']],
       run:()=>quiz('指北針與磁鐵',[
         {q:'指北針紅色的 N 極，會指向哪個方位？',pic:`<div style="display:flex;justify-content:center"><svg viewBox="-60 -60 120 120" width="150" height="150"><circle r="54" fill="#FFFFFF" stroke="${INK}" stroke-width="5"/><path d="M0 -44 L10 0 L-10 0Z" fill="#C86062"/><path d="M0 44 L10 0 L-10 0Z" fill="#2B79B5"/></svg></div>`,o:['北方','南方','東方'],ex:'指北針的 N 極會指向北方。'},
-        {q:'兩塊磁鐵的 N 極和 N 極靠近，會怎麼樣？',pic:magnetSvg(),o:['互相排斥（推開）','互相吸引','沒有反應'],ex:'同極相斥，異極相吸。'},
+        {q:'兩塊磁鐵的 N 極和 N 極靠近，會怎麼樣？',pic:magnetSvg('nn'),o:['互相排斥（推開）','互相吸引','沒有反應'],ex:'同極相斥，異極相吸。'},
         {q:'安平老街在古堡的東邊。指北針的 N 指向上方時，老街在畫面的哪一邊？',o:['右邊','左邊','下面'],ex:'上北、下南、左西、右東，東邊在右邊。'}]),
       ev:['逃跑的方向','老街在東邊。往右邊走，就能追上怪盜X！']}),
     pz('window',730,240,{r:55,hint:'古堡的窗戶裡黑漆漆的。',
