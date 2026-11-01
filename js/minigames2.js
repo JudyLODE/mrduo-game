@@ -528,8 +528,7 @@ function digDiv(title,lead,okMsg){const N=12,COL=['#C86062','#D4BB49','#5B84AB',
   const statue=`<g transform="translate(450 176)"><path d="M-14 34 Q-20 -10 0 -18 Q20 -10 14 34Z" fill="#DADCDA" stroke="${INK}" stroke-width="4"/><path d="M0 -18 q-8 -20 6 -30" stroke="#DADCDA" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M6 -48 l20 4 l-20 7z" fill="#3A3A40"/><path d="M-4 -40 l-18 -10 l4 10 l-4 10z" fill="#B9BCBA"/></g>`;
   const draw=()=>{let s=`<rect y="120" width="900" height="180" fill="#C9B085"/>`;
     if(phase==='div'){s+=stones.map((t,k)=>st[k]>=0?'':(sel===k?`<g transform="translate(${t[0]} ${t[1]})"><circle r="22" fill="none" stroke="#E8E19E" stroke-width="6"/><circle r="14" fill="${t[2]}" stroke="${INK}" stroke-width="3"/></g>`:`<g data-s="${k}" style="cursor:pointer"><circle cx="${t[0]}" cy="${t[1]}" r="14" fill="${t[2]}" stroke="${INK}" stroke-width="3"/></g>`)).join('')}
-    s+=HX.map((x,i)=>`<g data-h="${i}" style="cursor:pointer"><ellipse cx="${x}" cy="${HY}" rx="72" ry="30" fill="#8A6F4D" stroke="${INK}" stroke-width="5"/><ellipse cx="${x}" cy="${HY}" rx="54" ry="20" fill="#5F4A33"/><text x="${x}" y="${HY+64}" text-anchor="middle" font-size="24" font-weight="900" fill="${INK}" font-family="Fredoka,sans-serif">${cnt[i]}/4</text></g>`).join('');
-    if(phase==='dig'&&dug<6)s+=mound(1-dug/7);
+    s+=HX.map((x,i)=>`<g data-h="${i}" style="cursor:pointer"><ellipse cx="${x}" cy="${HY}" rx="72" ry="30" fill="#8A6F4D" stroke="${INK}" stroke-width="5"/><ellipse cx="${x}" cy="${HY}" rx="54" ry="20" fill="#5F4A33"/><text x="${x}" y="${HY+64}" text-anchor="middle" font-size="24" font-weight="900" fill="${INK}" font-family="Fredoka,sans-serif">${cnt[i]}/4</text>${i===1&&phase==='dig'&&dug<6?mound(1-dug/7):''}</g>`).join('');
     if(phase==='dig'&&dug>=6)s+=statue;
     if(phase==='fizz')s+=statue+Array.from({length:10},(_,k)=>`<circle class="bub" style="animation-delay:${k*.12}s" cx="${420+(k*23)%60}" cy="${140-(k*17)%50}" r="${4+k%4}" fill="none" stroke="#8DB36E" stroke-width="3"/>`).join('');
     q('#ddS').innerHTML=s;
@@ -569,24 +568,30 @@ function logicGrid(title,lead,people,trails,clues,sol,okMsg){return g2(title,'th
   api.solve(()=>{people.forEach((_,pi)=>trails.forEach((_,ti)=>{const b=q(`[data-p="${pi}"][data-t="${ti}"]`);mark[pi+'-'+ti]=sol[pi]===ti?'✓':'✗';b.textContent=mark[pi+'-'+ti];b.className='lgc'+(sol[pi]===ti?' on':' off')}));fire(q('#lgOk'))});
 },900)}
 
-/* ---------- 詞語填字：依序點出紅框字，拼出答案 ---------- */
-function charPick(title,lead,cards,ans,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
-  <div class="row" id="cpC" style="justify-content:center">${cards.map((c,i)=>`<button class="cpcard" data-i="${i}"><b>${c[0]}</b><span class="cpchar">${c[1]}</span></button>`).join('')}</div>
+/* ---------- 紅框字：偷看紅框裡的字，從字堆依序找出來 ---------- */
+function charPick(title,lead,cards,ans,okMsg){const bank=shuffle([...new Set(cards.flatMap(c=>[...c[0].replace(c[1],'')]))].concat(ans.split('')));
+ return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="row" id="cpC" style="justify-content:center">${cards.map((c,i)=>`<button class="cpcard" data-i="${i}"><b class="cpword" data-w="${i}">${c[0]}</b></button>`).join('')}</div>
+  <div class="cpbank" id="cpK"></div>
   <div class="cslots" id="cpS">${ans.split('').map(()=>'<button>？</button>').join('')}</div>
   <div class="row" style="justify-content:center;margin-top:10px"><button class="btn w" id="cpR">重來</button><button class="btn c" id="cpOk">拼好了</button></div>`,api=>{
-  const {q,qa}=api;const picked=[];let miss=0;
-  const draw=()=>{qa('#cpS button').forEach((s,k)=>s.textContent=picked[k]!=null?cards[picked[k]][1]:'？')};
-  q('#cpC').onclick=e=>{const b=e.target.closest('.cpcard');if(!b||b.disabled)return;
+  const {q,qa}=api;const peek=cards.map(()=>false);const used=new Set();const picked=[];let miss=0;
+  const drawWords=()=>{cards.forEach((c,i)=>{q(`#cpC [data-w="${i}"]`).innerHTML=[...c[0]].map(ch=>ch===c[1]?`<span class="cpchar${peek[i]?' on':''}">${peek[i]?c[1]:'□'}</span>`:ch).join('')})};
+  const drawBank=()=>{q('#cpK').innerHTML=bank.map((ch,k)=>`<button data-k="${k}" ${used.has(k)?'disabled style="opacity:.25"':''}>${ch}</button>`).join('')};
+  const draw=()=>{drawWords();drawBank();qa('#cpS button').forEach((s,k)=>s.textContent=picked[k]!=null?bank[picked[k]]:'？')};
+  q('#cpC').onclick=e=>{const b=e.target.closest('.cpcard');if(!b)return;const i=+b.dataset.i;peek[i]=!peek[i];sPop();draw()};
+  q('#cpK').onclick=e=>{const b=e.target.closest('[data-k]');if(!b||b.disabled)return;
     if(picked.length>=ans.length){api.say('四個格子滿了，點格子可以把字放回去。');return}
-    picked.push(+b.dataset.i);b.disabled=true;b.style.opacity=.4;sPop();draw()};
+    used.add(+b.dataset.k);picked.push(+b.dataset.k);sPop();draw()};
   q('#cpS').onclick=e=>{const s=e.target.closest('button');if(!s)return;const k=[...q('#cpS').children].indexOf(s);if(k>=picked.length)return;
-    const b=q(`#cpC [data-i="${picked[k]}"]`);if(b){b.disabled=false;b.style.opacity=1}picked.splice(k,1);sPop();draw()};
-  q('#cpR').onclick=()=>{picked.length=0;qa('#cpC .cpcard').forEach(b=>{b.disabled=false;b.style.opacity=1});draw()};
+    used.delete(picked[k]);picked.splice(k,1);sPop();draw()};
+  q('#cpR').onclick=()=>{picked.length=0;used.clear();peek.fill(false);draw();api.say('紅框再點一下可以蓋回去偷看。')};
   q('#cpOk').onclick=()=>{if(picked.length<ans.length){api.say('還沒選滿四個字。');return}
-    if(picked.map(i=>cards[i][1]).join('')===ans){sWin();api.ok(okMsg,2600)}
-    else{miss++;sBad();shake(q('#cpS'));api.no(miss>=2?'提示：按照紙條上四個詞的順序：梅花鹿、野生動物、高山、台灣。':'順序不對，再念念看紙條上的四個詞。')}};
-  draw();api.solve(()=>{ans.split('').forEach(ch=>fire(q(`#cpC [data-i="${cards.findIndex(c=>c[1]===ch)}"]`)));fire(q('#cpOk'))});
-},840)}
+    if(picked.map(k=>bank[k]).join('')===ans){sWin();api.ok(okMsg,2600)}
+    else{miss++;sBad();shake(q('#cpS'));api.no(miss>=2?'提示：四個詞是「梅花鹿、野生動物、高山、台灣」，紅框裡的字照這個順序排。':'順序不對。點卡片偷看紅框裡的字，再照紙條順序排。')}};
+  draw();
+  api.solve(()=>{ans.split('').forEach(ch=>{const k=bank.findIndex((x,n)=>x===ch&&!used.has(n));used.add(k);picked.push(k)});draw();fire(q('#cpOk'))});
+},860)}
 
 /* ---------- 拍照取證：燕子飛進圈圈時按快門 ---------- */
 function photoSnap(title,lead,need){return g2(title,'point',`<p class="lead">${lead}</p>
