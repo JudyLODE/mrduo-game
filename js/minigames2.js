@@ -116,7 +116,7 @@ function labBench(c){return g2(c.title,'think',`<div class="labstep" id="lbS"></
       q('#lbT').innerHTML=`<div class="story">${ok?'你猜對了！你有科學家的眼光。':'和你猜的不一樣——做實驗，就是為了知道真正的答案！'}<br>${c.why}</div>`;
       q('#lbR').innerHTML=`<button class="btn c" id="lbN">${c.after?'繼續':'寫進科學筆記'}</button>`;
       q('#lbN').onclick=()=>{G.lab=G.lab||[];G.lab.push({t:c.title,g:c.predict.o[st.guess],r:c.predict.o[right]});save();
-        if(c.after)c.after(api);else api.ok('化學魔法卡到手！')}};
+        if(c.after)c.after(api);else api.ok('科學魔法卡到手！')}};
     q('#lbT').onclick=e=>{const g=e.target.closest('[data-g]');if(g&&st.phase==='predict'){st.guess=+g.dataset.g;sPop();setup();return}
       const it=e.target.closest('.labitem');if(it&&st.phase==='setup'){st.sel=it.dataset.t;api.qa('.labitem').forEach(x=>x.classList.toggle('on',x===it));sPop()}};
     q('#lbV').addEventListener('click',e=>{if(st.phase!=='setup')return;const g=e.target.closest('[data-cup]');if(!g)return;const i=+g.dataset.cup;
@@ -709,6 +709,25 @@ function bridgeBal(title){return g2(title,'run',`<p class="lead">吊橋搖搖晃
   raf=requestAnimationFrame(loop);T2.push(raf);
   api.solve(()=>{prog=100});
 },960)}
+
+/* ---------- 岩石的形成：看長相特徵，幫岩石找到出生故事（地理） ---------- */
+function rockBorn(title,lead,rocks,stories,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="row" id="rkR" style="justify-content:center">${rocks.map((r,i)=>`<button class="rkrock" data-i="${i}"><span class="rkart">${r.art}</span><b>${r.n}</b></button>`).join('')}</div>
+  <div class="story" id="rkF">先點一塊岩石，看看它的長相。</div>
+  <div class="row" id="rkS" style="justify-content:center;align-items:stretch">${stories.map((s,i)=>`<button class="rkstory" data-s="${i}"><b>${s.t}</b><small>${s.d}</small></button>`).join('')}</div>`,api=>{
+  const {q,qa}=api;let sel=null;const done=new Set();let miss=0;
+  q('#rkR').onclick=e=>{const b=e.target.closest('.rkrock');if(!b||done.has(+b.dataset.i))return;sel=+b.dataset.i;const r=rocks[sel];
+    qa('.rkrock').forEach(x=>x.classList.toggle('on',x===b));sPop();
+    q('#rkF').innerHTML=`<b>${r.n}</b>的長相：${r.feat}<br><small>想一想：它最像哪一種岩石寶寶的出生故事？</small>`};
+  q('#rkS').onclick=e=>{const b=e.target.closest('.rkstory');if(!b)return;
+    if(sel===null){api.say('先點一塊岩石，看看它的長相。');return}
+    const r=rocks[sel];
+    if(+b.dataset.s===r.g){done.add(sel);const rb=q(`#rkR [data-i="${sel}"]`);rb.classList.add('done');rb.classList.remove('on');sel=null;sGood();
+      b.insertAdjacentHTML('beforeend',`<span class="rkgot">${r.n}</span>`);api.say(`答對了！${r.n}是「${stories[r.g].t}」。`,'ok');
+      if(done.size===rocks.length)api.ok(okMsg,3600)}
+    else{miss++;sBad();shake(b);api.no(miss>=2?`提示：${r.n}的長相是「${r.feat}」——哪一個故事會做出這種長相？`:'想想它的長相，再選一次！')}}; 
+  api.solve(()=>{rocks.forEach((r,i)=>{fire(q(`#rkR [data-i="${i}"]`));fire(q(`#rkS [data-s="${r.g}"]`))})});
+},920)}
 
 /* ---------- 數線標記（獨立版，給非實驗台的關卡用） ---------- */
 function numLineSolo(title,lead,o){return g2(title,'think',`<p class="lead">${lead}</p>

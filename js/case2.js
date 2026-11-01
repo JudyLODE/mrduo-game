@@ -75,8 +75,8 @@ async function c2ch1(){
         result:'③ 的果汁最先結成冰沙，② 只有一點點冰晶，① 還是果汁。',
         why:'冰塊撒上鹽會融化得更快，融化時會把旁邊的熱吸走，所以會冷到 0 度以下！',
         after:api=>numberLine(api,{title:'讀溫度計',lead:'三碗的溫度計：① 0 度、② 零下 2 度、③ 零下 12 度。把標籤放到數線上。',min:-15,max:5,step:1,label:5,tol:0,
-          items:[{l:'①',v:0,c:'#92C3DB'},{l:'②',v:-2,c:'#D4BB49'},{l:'③',v:-12,c:'#C86062',hint:'零下 12 度在 0 的左邊，數 12 格。'}],okMsg:'③ 比 ① 冷了 12 度！化學魔法卡「鹽冰魔法」到手！'})}),
-      ev:['化學魔法卡：鹽冰魔法','冰塊撒鹽會融得更快，而且會冷到 0 度以下。生活例子：漁港用加鹽的冰保存魚。']}),
+          items:[{l:'①',v:0,c:'#92C3DB'},{l:'②',v:-2,c:'#D4BB49'},{l:'③',v:-12,c:'#C86062',hint:'零下 12 度在 0 的左邊，數 12 格。'}],okMsg:'③ 比 ① 冷了 12 度！科學魔法卡「鹽冰魔法」到手！'})}),
+      ev:['科學魔法卡：鹽冰魔法','冰塊撒鹽會融得更快，而且會冷到 0 度以下。生活例子：漁港用加鹽的冰保存魚。']}),
     pz2('y_fur',1245,590,{r:50,hint:'蜂窩岩上勾著一撮橘色的毛。',art:()=>`<path d="M1235 590 q12 -14 22 2 q-10 10 -22 -2" fill="#D59D73" stroke="${INK}" stroke-width="3"/>`,
       intro:[['duo','橘色的毛……是狐狸毛！小穿山甲，用你的鼻子聞聞看！'],['pango2','交給我！嗅嗅嗅——有一條味道往海邊去了！']],
       run:()=>sniffTrail('夥伴技能：嗅一嗅','畫面上出現了橘色的氣味線。用手指沿著線走，帶小穿山甲找到東西！',[[80,400],[200,330],[330,360],[430,290],[520,330],[640,250],[760,280],[820,180]],SHORE_BG,'🎫'),
@@ -162,14 +162,14 @@ function c2Soon(n){return new Promise(()=>{setCh('未完待續');
     <button class="btn c" id="soonOk">回到首頁</button></div>`,b=>{b.querySelector('#soonOk').onclick=()=>location.reload()})})}
 /* 第二案結局（最終章結束後呼叫）：記錄破案次數、頒證書、預告第三案 */
 function c2Ending(){if(!G.counted){G.counted=1;const m=meta();m.c2=(m.c2||0)+1;setMeta(m)}G.ch=6;save();
-  setCh('第二案　破案成功！');const stars=G.energy>=5?3:G.energy>=3?2:1,cards=(G.ev||[]).filter(e=>/化學魔法卡/.test(e.t)).length;
+  setCh('第二案　破案成功！');const stars=G.energy>=5?3:G.energy>=3?2:1,cards=(G.ev||[]).filter(e=>/科學魔法卡/.test(e.t)).length;
   modal(`<div class="card cert" style="width:min(720px,100%)">
     <div style="display:flex;justify-content:center;align-items:flex-end;gap:10px"><img src="${COAT.coat_front.b}" alt="偵探多叔" style="height:190px;display:block"><div style="width:120px;height:120px">${avHead()}</div><div style="width:110px;height:110px">${head(CAST.pango2.look)}</div></div>
     <div style="letter-spacing:6px;font-weight:900;color:var(--ink2)">第二案　破案證書</div>
     <h3 style="font-size:36px;margin:6px 0">${fmt('{n}')} 偵探助手</h3>
-    <p class="lead" style="margin:0">和偵探多叔、小穿山甲一起，用科學拆穿了魔術師怪盜X的五個魔術，把寶物全部找回來了！${cards>=5?'<br><b>獲得稱號：小化學家</b>':''}</p>
+    <p class="lead" style="margin:0">和偵探多叔、小穿山甲一起，用科學拆穿了魔術師怪盜X的五個魔術，把寶物全部找回來了！${cards>=5?'<br><b>獲得稱號：小科學家</b>':''}</p>
     <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
-    <div class="stats"><div><b>${G.energy}/5</b>推理力</div><div><b>${G.badges.length}/15</b>骨頭徽章</div><div><b>${G.quests.length}/5</b>幫忙任務</div><div><b>${cards}</b>化學魔法卡</div></div>
+    <div class="stats"><div><b>${G.energy}/5</b>推理力</div><div><b>${G.badges.length}/15</b>骨頭徽章</div><div><b>${G.quests.length}/5</b>幫忙任務</div><div><b>${cards}</b>科學魔法卡</div></div>
     <div class="story" style="text-align:left">${CASES[3].teaser}</div>
     <p class="lead" style="margin:10px 0 0">再辦一次第二案的話，學科題目會換成新的喔！</p>
     <div class="row" style="justify-content:center;margin-top:14px"><button class="btn c" id="c2Home">回到案件簿</button></div></div>`,b=>{b.querySelector('#c2Home').onclick=()=>location.reload()})}

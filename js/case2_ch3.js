@@ -11,6 +11,26 @@ const tScaleArt=()=>`<g transform="translate(760 430)"><rect x="-52" y="-8" widt
 const tSilArt=()=>`<g transform="translate(1400 858)"><ellipse rx="26" ry="12" fill="#2E384F" opacity=".75"/><path d="M-14 -4 q-8 -14 2 -22 M0 -6 q-8 -14 2 -22 M12 -4 q-8 -14 2 -22" stroke="#2E384F" stroke-width="4" fill="none" stroke-linecap="round"/></g>`;
 const tEnArt=()=>boardArt(600,430,'EN','#92C3DB');
 
+/* ---------- 岩石三兄弟（地質課資料） ---------- */
+const RK_ART={
+ granite:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#C9C3BB" stroke="${INK}" stroke-width="3"/>${[[18,20,'#3A3A40'],[30,32,'#F2EFE9'],[42,20,'#D9A0A8'],[36,35,'#3A3A40'],[24,34,'#F2EFE9'],[46,29,'#D9A0A8']].map(([x,y,c])=>`<circle cx="${x}" cy="${y}" r="3.2" fill="${c}"/>`).join('')}</svg>`,
+ basalt:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#4A4653" stroke="${INK}" stroke-width="3"/>${[[20,22],[30,30],[42,24],[36,34],[48,30],[24,18]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.4" fill="#2A2733"/>`).join('')}</svg>`,
+ sandstone:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#D9B98C" stroke="${INK}" stroke-width="3"/><path d="M10 22 q22 -6 44 0 M10 30 q22 -6 44 0" stroke="#C9A06E" stroke-width="2" fill="none"/>${[[20,24],[34,28],[44,24],[28,34],[42,33]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#B08A5C"/>`).join('')}</svg>`,
+ shale:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#9AA0A8" stroke="${INK}" stroke-width="3"/>${[17,22,27,32,37].map(y=>`<path d="M${32-Math.sqrt(Math.max(0,1-((y-27)/16)**2))*24} ${y} q${Math.sqrt(Math.max(0,1-((y-27)/16)**2))*24} 3 ${Math.sqrt(Math.max(0,1-((y-27)/16)**2))*48} 0" stroke="#7E858E" stroke-width="2.4" fill="none"/>`).join('')}</svg>`,
+ marble:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#EFEDE8" stroke="${INK}" stroke-width="3"/><path d="M12 24 q10 -8 20 -2 t20 -4 M14 32 q12 -6 22 0 t16 -4" stroke="#B9B4AC" stroke-width="2.6" fill="none"/></svg>`,
+ schist:`<svg viewBox="0 0 64 46"><ellipse cx="32" cy="27" rx="26" ry="16" fill="#8A93A8" stroke="${INK}" stroke-width="3"/><path d="M12 22 q10 -6 20 0 t20 -2 M12 30 q12 -6 22 0 t18 -2" stroke="#C9D2E8" stroke-width="3" fill="none"/>${[[22,20],[40,26],[30,34]].map(([x,y])=>`<path d="M${x} ${y-4} l2 3 3 1 -3 2 -1 3 -2 -3 -3 -1 3 -2z" fill="#F2F6FF"/>`).join('')}</svg>`};
+const RK_ROCKS=[
+  {n:'花崗岩',g:0,feat:'顆粒粗粗的，有黑色、白色、粉紅色的小礦物',art:RK_ART.granite},
+  {n:'玄武岩',g:0,feat:'黑黑暗暗的，上面有很多小氣孔',art:RK_ART.basalt},
+  {n:'砂岩',g:1,feat:'摸得到一粒一粒的砂，常常一層一層的',art:RK_ART.sandstone},
+  {n:'頁岩',g:1,feat:'可以剝成一片一片，像書本的一頁一頁',art:RK_ART.shale},
+  {n:'大理岩',g:2,feat:'有美麗的花紋，可以磨得亮亮的',art:RK_ART.marble},
+  {n:'片岩',g:2,feat:'亮亮的礦物排成一片一片',art:RK_ART.schist}];
+const RK_STORIES=[
+  {t:'🌋 岩漿寶寶（火成岩）',d:'岩漿從地底衝出來，慢慢冷卻變硬。'},
+  {t:'🌊 層層寶寶（沉積岩）',d:'泥沙、貝殼在水底一層一層堆起來，壓緊變硬。'},
+  {t:'💎 變裝寶寶（變質岩）',d:'岩石在地底被高溫高壓改造，脫胎換骨。'}];
+
 /* ---------- 英文路牌的圖 ---------- */
 const MP_B=`${(()=>{const arc=x=>(44-Math.sin((x-4)/72*Math.PI)*30).toFixed(1);return `<svg viewBox="0 0 80 60" style="width:100%;max-height:64px;display:block"><path d="M4 44 Q40 10 76 44" stroke="#2E384F" stroke-width="6" fill="none"/><path d="M4 44 H76" stroke="#2E384F" stroke-width="4"/>${[16,28,40,52,64].map(x=>`<line x1="${x}" y1="${arc(x)}" x2="${x}" y2="44" stroke="#2E384F" stroke-width="3"/>`).join('')}</svg>`})()}`;
 const MP_R=`<svg viewBox="0 0 80 60" style="width:100%;max-height:64px;display:block"><path d="M6 22 q10 -8 20 0 t20 0 t20 0" stroke="#5B9BC2" stroke-width="7" fill="none"/><path d="M6 40 q10 -8 20 0 t20 0 t20 0" stroke="#5B9BC2" stroke-width="7" fill="none"/></svg>`;
@@ -23,13 +43,13 @@ const MP_STONE=`<svg viewBox="0 0 80 60" style="width:100%;max-height:64px;displ
 async function c2ch3(){
   G.ch=3;save();setCh('第三章　會呼吸的石頭');DUO.coat=true;
   setScene({id:'taroko',color:'#BFD9E6',bg:bgTaroko,duo:[760,895,300],ground:()=>895,range:[150,1450],spots:[
-    pz2('t_hut',1285,760,{r:55,hint:'步道小屋的桌上放著五樣白色的東西。',art:tHutArt,
+    pz2('t_hut',1285,760,{r:55,hint:'步道小屋掛著「地質教室」的牌子，桌上擺著岩石標本。',art:tHutArt,
       intro:[['macaque','偵探先生！我是台灣獼猴巡山員。怪盜X 表演「會呼吸的石頭」，表演完，展示館的大理石燕子就不見了！'],
-             ['duo','石頭會呼吸？{n}，我們先用桌上的東西做實驗！真的實驗要有大人陪，桌上的東西都不能吃。',{e:'think'}]],
-      run:()=>fizzSort('哪些白色東西會冒泡？','五樣白色的東西，哪些遇到醋會「呼呼呼」冒泡泡？先分分看，再滴醋驗證！',
-        [['大理石','🪨',1],['雞蛋殼','🥚',1],['貝殼','🐚',1],['方糖','🍬',0],['蠟燭','🕯️',0]],
-        '大理石、蛋殼、貝殼都含有「碳酸鈣」，遇到醋會產生二氧化碳——泡泡就是這樣來的！這就是石頭「呼吸」的秘密。'),
-      ev:['化學魔法卡：呼吸魔法','大理石含有碳酸鈣，遇到醋會產生二氧化碳泡泡——一顆一顆泡泡，看起來就像石頭在呼吸！']}),
+             ['duo','大理石燕子……{n}，先來上上巡山員的地質課！會看岩石，才找得到怪盜X 的線索。',{e:'think'}]],
+      run:()=>rockBorn('岩石三兄弟：你是哪一種寶寶？','每塊岩石的「長相」都透露了它的出生故事。點一塊岩石看看長相，再點它的出生故事！',
+        RK_ROCKS,RK_STORIES,
+        '六塊岩石都找到自己的家了！大理岩是變質岩——太魯閣的大峽谷、展示館的燕子雕像，都是大理岩做的！'),
+      ev:['岩石三兄弟','花崗岩、玄武岩是岩漿冷卻的火成岩；砂岩、頁岩是一層層堆積的沉積岩；大理岩、片岩是高溫高壓變身的變質岩——太魯閣峽谷就是大理岩！'],after:'地質教室隨時歡迎你！'}),
     pz2('t_sign',395,870,{r:48,hint:'步道旁的解說牌，被人翻成背面了。',art:()=>boardArt(395,870,'解說牌','#FFFFFF'),
       intro:[['duo','解說牌上寫著「岩石與醋」。怪盜X 把配對弄亂了，我們來復原。']],
       run:()=>flipPair('解說牌配對','把「材料」跟「滴醋之後的樣子」配成一對！',
@@ -44,8 +64,8 @@ async function c2ch3(){
       intro:[['pango2','多叔！這個土堆軟軟的，我來挖！先幫我把 12 顆小石頭平分裝進三個洞，免得滾走。'],
              ['duo','好主意！12 顆平分給 3 個洞，每洞要一樣多——這就是「除法」喔。',{e:'welcome'}]],
       run:()=>digDiv('溪邊土堆的秘密','先把 12 顆小石頭平分到 3 個洞（每洞一樣多），再挖挖看中間的土堆！',
-        '挖到了！土堆裡藏著大理石做的小燕子，滴醋會冒泡——怪盜X 在這裡練習「讓石頭呼吸」。'),
-      ev:['練習用的大理石','土堆裡藏著大理石碎片和一座小石燕——怪盜X 在溪邊偷偷練習「石頭呼吸術」。']}),
+        '挖到了！是大理石做的小燕子，滴醋還會冒泡泡——怪盜X 在這裡練習「讓石頭呼吸」！'),
+      ev:['科學魔法卡：呼吸魔法','土堆裡挖到大理石（變質岩）做的小燕子：滴醋會冒出二氧化碳泡泡，看起來就像石頭在呼吸！怪盜X 在溪邊偷偷練習這一招。']}),
     pz2('t_fork',260,855,{r:48,hint:'步道分岔口的路標指向不同步道。',art:tForkArt,
       intro:[['duo','三個人走向三條不同的步道。把線索排出來，看看每個人走哪一條！',{e:'point'}]],
       run:()=>logicGrid('誰走哪條步道？',

@@ -396,6 +396,15 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 .smw button{width:104px;border:4px solid var(--line);border-radius:16px;background:#FFFDF6;padding:6px;box-shadow:0 4px 0 var(--line)}
 .smw button svg{width:100%;display:block}
 .smw button.lit{transform:translateY(3px);box-shadow:0 1px 0 var(--line);background:#FFF6D8}
+.rkrock{display:flex;flex-direction:column;align-items:center;gap:4px;background:#FFFFFF;border:3px solid var(--line);border-radius:14px;padding:8px 10px;box-shadow:0 4px 0 var(--line);min-width:96px}
+.rkrock.on{background:#FFF6D8}
+.rkrock.done{opacity:.45}
+.rkart svg{width:64px;height:46px;display:block}
+.rkstory{display:flex;flex-direction:column;gap:4px;flex:1;max-width:230px;background:#FFFDF6;border:3px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 4px 0 var(--line);text-align:left}
+.rkstory b{font-size:20px}
+.rkstory small{color:var(--ink2);font-weight:700;font-size:15px;line-height:1.5}
+.rkgot{display:inline-block;background:#D3E4C7;border:2px solid #50A260;border-radius:999px;padding:0 8px;font-size:14px;font-weight:900;margin-top:4px;align-self:flex-start}
+@media (max-width:760px){.rkrock{min-width:80px;padding:6px}}
 @media (max-width:760px){.cngrid{grid-template-columns:repeat(2,1fr)}}
 
 /* ================= 第三章 太魯閣 新玩法的樣式（低彩度純色） ================= */
