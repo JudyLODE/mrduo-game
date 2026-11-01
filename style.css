@@ -368,3 +368,32 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 .silbox.part{outline:6px solid #E8E19E}
 .sichoice{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.sichoice button{display:flex;flex-direction:column;align-items:center;gap:4px;background:#FFFFFF;border:3px solid var(--line);border-radius:16px;padding:10px;font-size:18px;box-shadow:0 4px 0 var(--line)}
 @media (max-width:760px){.mirwrap,.sdwrap,.tsgrid,.labgrid{grid-template-columns:1fr}}
+
+/* ================= 第二章 九份 新玩法的樣式（低彩度純色） ================= */
+.fmg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.fmg button{aspect-ratio:3/3.5;border-radius:14px;border:4px solid var(--line);background:#C86062;box-shadow:0 4px 0 var(--line);display:grid;place-items:center;padding:6px}
+.fmg button .bk{font-size:36px;color:#F7E8D0}
+.fmg button .ft{display:none;place-items:center;gap:3px;width:100%;height:100%;text-align:center}
+.fmg button.open{background:#FFFDF6}
+.fmg button.open .bk{display:none}
+.fmg button.open .ft{display:grid}
+.fmg button.done{background:#D3E4C7}
+.cngrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cnc{background:#FFFDF6;border:3px solid var(--line);border-radius:16px;padding:8px;text-align:center}
+.cnbig{width:100%;aspect-ratio:1.1;font:900 58px var(--f-hand);background:#FFFFFF;border:4px solid var(--line);border-radius:14px;box-shadow:0 4px 0 var(--line)}
+.cnde{background:#F0F2F6;border:3px dashed var(--line);border-radius:10px;padding:4px;font-size:17px;font-weight:900;margin:8px 0 6px}
+.cnopts{display:flex;gap:6px;justify-content:center}
+.cnopts button{flex:1;min-height:46px;background:#FFFFFF;border:3px solid var(--line);border-radius:10px;font:700 20px var(--f-en);box-shadow:0 3px 0 var(--line)}
+.cnopts button.on{background:#D3E4C7}
+.cnopts button:disabled{opacity:.4}
+.rsrow{display:flex;align-items:center;gap:12px;background:#FFFDF6;border:3px solid var(--line);border-radius:14px;padding:8px 14px;margin:8px 0}
+.rsrow b{flex:1;font-size:22px}
+.rsrow small{color:var(--ink2);font-weight:900;white-space:nowrap}
+.rsp{display:flex;align-items:center;gap:8px}
+.rsp button{width:50px;height:50px;border-radius:12px;border:3px solid var(--line);background:var(--sun);font-size:24px;font-weight:900;box-shadow:0 3px 0 var(--line)}
+.rsp span{min-width:104px;text-align:center;font:700 22px var(--f-en);background:#F0F2F6;border:3px dashed var(--line);border-radius:10px;padding:6px}
+.smw{display:flex;gap:12px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.smw button{width:104px;border:4px solid var(--line);border-radius:16px;background:#FFFDF6;padding:6px;box-shadow:0 4px 0 var(--line)}
+.smw button svg{width:100%;display:block}
+.smw button.lit{transform:translateY(3px);box-shadow:0 1px 0 var(--line);background:#FFF6D8}
+@media (max-width:760px){.cngrid{grid-template-columns:repeat(2,1fr)}}
