@@ -474,3 +474,234 @@ function wordToCups(api,o){const {q}=api;let sel=null;const done=new Set();let m
   draw();
   api.solve(()=>{o.cups.forEach((c,i)=>{fire(q(`#lbT [data-w="${i}"]`));fire(q(`#lbV [data-cup="${i}"]`))})});
 }
+
+/* ================= 第三章 太魯閣 的新玩法 ================= */
+
+/* ---------- 冒泡分類：先猜哪些白色東西遇醋會冒泡，再滴醋驗證 ---------- */
+function fizzSort(title,lead,items,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="sbitems" id="fzI">${items.map((it,i)=>`<button class="sbit" data-i="${i}">${ico(it[1],38)}<span>${it[0]}</span></button>`).join('')}</div>
+  <div class="sbbaskets" id="fzB">${['我猜：會冒泡','我猜：不會冒泡'].map((b,k)=>`<div class="sbb" data-b="${k}"><b>${b}</b><div class="sbin" id="fzS${k}"></div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;margin-top:8px"><button class="btn c" id="fzGo" disabled>🧪 滴醋，看結果！</button></div>`,api=>{
+  const {q}=api;const put=items.map(()=>-1);let sel=null,phase='sort';
+  const drawBins=()=>{[0,1].forEach(k=>{q('#fzS'+k).innerHTML=items.map((it,i)=>put[i]===k?ico(it[1],30):'').join('')});
+    items.forEach((it,i)=>q(`.sbit[data-i="${i}"]`).style.opacity=put[i]>=0?.45:1)};
+  q('#fzI').onclick=e=>{const b=e.target.closest('.sbit');if(!b||phase!=='sort'||put[+b.dataset.i]>=0)return;sel=+b.dataset.i;api.qa('.sbit').forEach(x=>x.classList.toggle('on',x===b));sPop()};
+  q('#fzB').onclick=e=>{const bk=e.target.closest('.sbb');if(!bk||phase!=='sort'||sel===null)return;
+    put[sel]=+bk.dataset.b;sel=null;sPop();drawBins();
+    if(put.every(v=>v>=0)){q('#fzGo').disabled=false;api.say('分好了！現在滴醋，看看真正的結果。')}};
+  q('#fzGo').onclick=()=>{phase='fizz';sWin();
+    const right=items.filter((it,i)=>put[i]===(it[2]?0:1)).length;
+    q('#fzB').outerHTML=items.map((it,i)=>`<div class="rsrow" style="margin:6px 0"><b>${it[1]} ${it[0]}</b><small>你的猜測：${put[i]===0?'會冒泡':'不會冒泡'}</small><span class="rsp" style="font-weight:900;font-size:20px;color:${it[2]?'#2B79B5':'#8A8F98'}">${it[2]?'🫧 冒泡泡了！':'安安靜靜'}</span></div>`).join('')+
+      `<div class="row" style="justify-content:center;margin-top:10px"><button class="btn c" id="fzOk">寫進科學筆記</button></div>`;
+    q('#fzI').innerHTML='';q('#fzGo').hidden=true;
+    api.say(`你猜對了 ${right}/${items.length} 個！${right===items.length?'太厲害了！':'沒關係，做實驗就是為了知道真正的答案。'}`);
+    q('#fzOk').onclick=()=>api.ok(okMsg,3200)};
+  api.solve(()=>{items.forEach((it,i)=>{fire(q(`.sbit[data-i="${i}"]`));fire(q(`.sbb[data-b="${it[2]?0:1}"]`))});fire(q('#fzGo'));fire(q('#fzOk'))});
+},860)}
+
+/* ---------- 翻牌配對（自訂卡面）：材料 ↔ 滴醋後的樣子 ---------- */
+function flipPair(title,lead,pairs,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="fmg" id="fpG" style="grid-template-columns:repeat(5,1fr)"></div>`,api=>{
+  const {q}=api;const cards=shuffle(pairs.flatMap((p,i)=>[{k:i,h:p[0]},{k:i,h:p[1]}]));let open=[],lock=false,done=0;
+  const draw=()=>{q('#fpG').innerHTML=cards.map((c,i)=>`<button data-i="${i}" class="${c.up||c.ok?'open':''}${c.ok?' done':''}" style="aspect-ratio:3/3.4"><span class="bk">🔍</span><span class="ft">${c.h}</span></button>`).join('')};
+  q('#fpG').onclick=e=>{const b=e.target.closest('[data-i]');if(!b||lock)return;const c=cards[+b.dataset.i];if(c.ok||c.up)return;
+    c.up=1;open.push(c);sPop();draw();
+    if(open.length===2){const [a,b2]=open;
+      if(a.k===b2.k){a.ok=b2.ok=1;done++;sGood();open=[];api.say('配對成功！','ok');if(done===pairs.length)api.ok(okMsg,1800)}
+      else{lock=true;sBad();api.say('不一樣，蓋回去。記住位置，再試一次！');lockFor(()=>{a.up=b2.up=0;open=[];lock=false;draw()},1000)}}};
+  draw();api.solve(()=>{pairs.forEach((p,k)=>{cards.forEach((c,i)=>{if(c.k===k&&!c.up&&!c.ok)fire(q(`#fpG [data-i="${i}"]`))})})});
+},920)}
+
+/* ---------- 平分＋挖一挖：12 樣平分到 3 個洞，再挖出秘密 ---------- */
+function digDiv(title,lead,okMsg){const N=12,COL=['#C86062','#D4BB49','#5B84AB','#8DB36E'];
+ return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="ddS" viewBox="0 0 900 300" style="width:100%;max-height:290px;border:4px solid ${INK};border-radius:16px;display:block;background:#D9C7A3;touch-action:none"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="ddP"></span></div>
+  <div class="row" id="ddR" style="justify-content:center"></div>`,api=>{
+  const {q}=api;const HX=[200,450,700],HY=228;const cnt=[0,0,0];const st=Array(N).fill(-1);let sel=null,phase='div',dug=0;
+  const stones=Array.from({length:N},(_,k)=>[70+(k%6)*58,52+Math.floor(k/6)*52,COL[k%4]]);
+  const mound=s=>`<g transform="translate(450 210) scale(${s})"><ellipse rx="86" ry="34" fill="#B9A58C" stroke="${INK}" stroke-width="5"/><ellipse cx="-20" cy="-8" rx="26" ry="10" fill="#C9B085"/><ellipse cx="26" cy="-4" rx="18" ry="8" fill="#C9B085"/></g>`;
+  const statue=`<g transform="translate(450 176)"><path d="M-14 34 Q-20 -10 0 -18 Q20 -10 14 34Z" fill="#DADCDA" stroke="${INK}" stroke-width="4"/><path d="M0 -18 q-8 -20 6 -30" stroke="#DADCDA" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M6 -48 l20 4 l-20 7z" fill="#3A3A40"/><path d="M-4 -40 l-18 -10 l4 10 l-4 10z" fill="#B9BCBA"/></g>`;
+  const draw=()=>{let s=`<rect y="120" width="900" height="180" fill="#C9B085"/>`;
+    if(phase==='div'){s+=stones.map((t,k)=>st[k]>=0?'':(sel===k?`<g transform="translate(${t[0]} ${t[1]})"><circle r="22" fill="none" stroke="#E8E19E" stroke-width="6"/><circle r="14" fill="${t[2]}" stroke="${INK}" stroke-width="3"/></g>`:`<g data-s="${k}" style="cursor:pointer"><circle cx="${t[0]}" cy="${t[1]}" r="14" fill="${t[2]}" stroke="${INK}" stroke-width="3"/></g>`)).join('')}
+    s+=HX.map((x,i)=>`<g data-h="${i}" style="cursor:pointer"><ellipse cx="${x}" cy="${HY}" rx="72" ry="30" fill="#8A6F4D" stroke="${INK}" stroke-width="5"/><ellipse cx="${x}" cy="${HY}" rx="54" ry="20" fill="#5F4A33"/><text x="${x}" y="${HY+64}" text-anchor="middle" font-size="24" font-weight="900" fill="${INK}" font-family="Fredoka,sans-serif">${cnt[i]}/4</text></g>`).join('');
+    if(phase==='dig'&&dug<6)s+=mound(1-dug/7);
+    if(phase==='dig'&&dug>=6)s+=statue;
+    if(phase==='fizz')s+=statue+Array.from({length:10},(_,k)=>`<circle class="bub" style="animation-delay:${k*.12}s" cx="${420+(k*23)%60}" cy="${140-(k*17)%50}" r="${4+k%4}" fill="none" stroke="#8DB36E" stroke-width="3"/>`).join('');
+    q('#ddS').innerHTML=s;
+    q('#ddP').textContent=phase==='div'?'把 12 顆小石頭「平分」到 3 個洞：點石頭，再點洞（每洞 4 顆）':phase==='dig'?'12 ÷ 3 ＝ 4，每洞一樣多！點中間的土堆挖挖看！':'🫧 大理石做的！';
+    q('#ddR').innerHTML=phase==='dig'&&dug>=6?`<button class="btn c" id="ddV">🧪 滴醋驗貨</button>`:''};
+  q('#ddS').onclick=e=>{const g=e.target.closest('[data-s],[data-h]');if(!g)return;
+    if(g.dataset.s!=null){if(phase!=='div')return;sel=+g.dataset.s;sPop();draw();return}
+    const h=+g.dataset.h;
+    if(phase==='div'){if(sel===null){api.say('先點一顆小石頭。');return}
+      if(cnt[h]>=4){api.no('這個洞滿了！每個洞要一樣多。');return}
+      cnt[h]++;st[sel]=h;sel=null;sPop();
+      if(st.every(v=>v>=0)){phase='dig';sWin();api.say('平分好了！12 ÷ 3 ＝ 4。現挖土堆！')}draw();return}
+    if(phase==='dig'){if(h!==1)return;dug++;tone([300+dug*30],.05,'sine',.08);draw();
+      if(dug>=6){sGood();api.say('挖到東西了！是一座燕子雕像……敲敲看是什麼材料？')}}};
+  q('#ddR').onclick=e=>{if(!e.target.closest('#ddV'))return;phase='fizz';sWin();draw();
+    lockFor(()=>api.ok(okMsg,3000),1400)};
+  draw();
+  api.solve(()=>{for(let k=0;k<N;k++){fire(q(`#ddS [data-s="${k}"]`));fire(q(`#ddS [data-h="${k%3}"]`))}
+    for(let k=0;k<6;k++)fire(q('#ddS [data-h="1"]'));fire(q('#ddV'))});
+},920)}
+
+/* ---------- 邏輯推理格：✓ ✗ 推出誰走哪條步道 ---------- */
+function logicGrid(title,lead,people,trails,clues,sol,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:start"><div><div class="story"><b>線索：</b><ul style="margin:6px 0 0;padding-left:22px;line-height:1.9;font-size:18px">${clues.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+  <div class="story" style="margin-top:10px;background:#FFF6D8">每個人走一條不同的步道。點格子可以切換：？→ ✓ → ✗。</div></div>
+  <div><div class="lg" id="lgG"><div class="lgh"></div>${trails.map(t=>`<div class="lgh">${t}</div>`).join('')}${people.map((p,pi)=>`<div class="lgh">${p}</div>${trails.map((_,ti)=>`<button class="lgc" data-p="${pi}" data-t="${ti}">？</button>`).join('')}`).join('')}</div>
+  <div class="row" style="justify-content:center;margin-top:10px"><button class="btn c" id="lgOk">推理好了</button></div></div></div>`,api=>{
+  const {q,qa}=api;const mark={};let miss=0;
+  q('#lgG').onclick=e=>{const b=e.target.closest('.lgc');if(!b)return;const k=b.dataset.p+'-'+b.dataset.t;
+    mark[k]=mark[k]==null?'✓':mark[k]==='✓'?'✗':null;
+    b.textContent=mark[k]||'？';b.className='lgc'+(mark[k]==='✓'?' on':mark[k]==='✗'?' off':'');sPop()};
+  q('#lgOk').onclick=()=>{let bad=null;
+    people.forEach((_,pi)=>trails.forEach((_,ti)=>{const m=mark[pi+'-'+ti];if((sol[pi]===ti)?m!=='✓':m==='✓')bad=[pi,ti]}));
+    if(!bad){sWin();api.ok(okMsg,3000)}
+    else{miss++;sBad();shake(q(`[data-p="${bad[0]}"][data-t="${bad[1]}"]`));
+      api.no(miss>=2?'提示：先用「獼猴巡山員走燕子口」，再想想剩下兩個人怎麼分。':'有格子跟線索矛盾，再想想看！')}};
+  api.solve(()=>{people.forEach((_,pi)=>trails.forEach((_,ti)=>{const b=q(`[data-p="${pi}"][data-t="${ti}"]`);mark[pi+'-'+ti]=sol[pi]===ti?'✓':'✗';b.textContent=mark[pi+'-'+ti];b.className='lgc'+(sol[pi]===ti?' on':' off')}));fire(q('#lgOk'))});
+},900)}
+
+/* ---------- 詞語填字：依序點出紅框字，拼出答案 ---------- */
+function charPick(title,lead,cards,ans,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="row" id="cpC" style="justify-content:center">${cards.map((c,i)=>`<button class="cpcard" data-i="${i}"><b>${c[0]}</b><span class="cpchar">${c[1]}</span></button>`).join('')}</div>
+  <div class="cslots" id="cpS">${ans.split('').map(()=>'<button>？</button>').join('')}</div>
+  <div class="row" style="justify-content:center;margin-top:10px"><button class="btn w" id="cpR">重來</button><button class="btn c" id="cpOk">拼好了</button></div>`,api=>{
+  const {q,qa}=api;const picked=[];let miss=0;
+  const draw=()=>{qa('#cpS button').forEach((s,k)=>s.textContent=picked[k]!=null?cards[picked[k]][1]:'？')};
+  q('#cpC').onclick=e=>{const b=e.target.closest('.cpcard');if(!b||b.disabled)return;
+    if(picked.length>=ans.length){api.say('四個格子滿了，點格子可以把字放回去。');return}
+    picked.push(+b.dataset.i);b.disabled=true;b.style.opacity=.4;sPop();draw()};
+  q('#cpS').onclick=e=>{const s=e.target.closest('button');if(!s)return;const k=[...q('#cpS').children].indexOf(s);if(k>=picked.length)return;
+    const b=q(`#cpC [data-i="${picked[k]}"]`);if(b){b.disabled=false;b.style.opacity=1}picked.splice(k,1);sPop();draw()};
+  q('#cpR').onclick=()=>{picked.length=0;qa('#cpC .cpcard').forEach(b=>{b.disabled=false;b.style.opacity=1});draw()};
+  q('#cpOk').onclick=()=>{if(picked.length<ans.length){api.say('還沒選滿四個字。');return}
+    if(picked.map(i=>cards[i][1]).join('')===ans){sWin();api.ok(okMsg,2600)}
+    else{miss++;sBad();shake(q('#cpS'));api.no(miss>=2?'提示：按照紙條上四個詞的順序：梅花鹿、野生動物、高山、台灣。':'順序不對，再念念看紙條上的四個詞。')}};
+  draw();api.solve(()=>{ans.split('').forEach(ch=>fire(q(`#cpC [data-i="${cards.findIndex(c=>c[1]===ch)}"]`)));fire(q('#cpOk'))});
+},840)}
+
+/* ---------- 拍照取證：燕子飛進圈圈時按快門 ---------- */
+function photoSnap(title,lead,need){return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="phS" viewBox="0 0 900 420" style="width:100%;max-height:340px;border:4px solid ${INK};border-radius:16px;display:block;background:#BFD9E6"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="phN"></span><button class="btn c" id="phB" style="min-width:190px">📸 快門！</button></div>`,api=>{
+  const {q}=api;let birds=[],caught=0,raf,next=performance.now()+500;
+  const mk=()=>({x:Math.random()<.5?-60:960,y:80+Math.random()*230,v:(Math.random()<.5?1:-1)*(1.7+Math.random()*1.5),w:Math.random()*10});
+  const bird=p=>`<g transform="translate(${p.x} ${p.y}) scale(${p.v>0?1:-1} 1)"><path d="M-6 4 L-28 -6 L-21 4 L-28 14Z" fill="#34405F"/><ellipse rx="14" ry="8" fill="#34405F"/><ellipse cx="4" cy="4" rx="9" ry="5" fill="#F4EEE6"/><circle cx="12" cy="-4" r="4.5" fill="#C86062"/><path d="M15 -3 l12 2.5 l-12 3.5z" fill="#3A3A40"/><path d="M-2 -6 q${p.w%2?10:-10} -14 ${p.w%2?20:2} -6" stroke="#34405F" stroke-width="4.5" fill="none" stroke-linecap="round"/></g>`;
+  const drawBG=()=>`<rect width="900" height="420" fill="#BFD9E6"/><path d="M0 330 Q200 300 400 330 T900 320 V420 H0Z" fill="#DADCDA"/><path d="M620 420 L700 170 H770 L700 420Z" fill="#D0D3D1"/><path d="M640 240 h84 M652 200 h60" stroke="#B9BCBA" stroke-width="5"/>`;
+  const loop=now=>{if(api.over())return;
+    if(now>next){birds.push(mk());next=now+850+Math.random()*900}
+    birds.forEach(b=>{b.x+=b.v;b.w+=.35});
+    birds=birds.filter(b=>b.x>-100&&b.x<1000);
+    q('#phS').innerHTML=drawBG()+birds.map(bird).join('')+
+      `<circle cx="450" cy="205" r="95" fill="none" stroke="#C86062" stroke-width="6" stroke-dasharray="14 10"/><path d="M450 124 v-22 M450 286 v22 M369 205 h-22 M531 205 h22" stroke="#C86062" stroke-width="5"/>`;
+    q('#phN').textContent=`拍到的燕子：${caught}/${need}`;
+    raf=requestAnimationFrame(loop);T2.push(raf)};
+  q('#phB').onclick=()=>{const hit=birds.find(b=>Math.hypot(b.x-450,b.y-205)<100);
+    if(hit){birds.splice(birds.indexOf(hit),1);caught++;sGood();q('#phS').style.filter='brightness(1.7)';setTimeout(()=>{if(!api.over())q('#phS').style.filter=''},130);
+      if(caught>=need)api.ok('拍到了！燕子口的照片一清二楚。',2000)}
+    else{sBad();api.say('沒拍到……等燕子飛進紅色圈圈裡再按快門！')}};
+  raf=requestAnimationFrame(loop);T2.push(raf);
+  api.solve(()=>{const t=setInterval(()=>{if(api.over()){clearInterval(t);return}
+    if(birds.some(b=>Math.hypot(b.x-450,b.y-205)<100))fire(q('#phB'))},120);T2.push(t)});
+},920)}
+
+/* ---------- 連連看：英文單字連到圖案 ---------- */
+function matchPair(title,lead,pairs,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="mp" id="mpG"><div>${pairs.map((p,i)=>`<button class="mpw" data-k="${i}"><b>${p[0]}</b><small>${p[2]}</small></button>`).join('')}</div>
+  <div>${shuffle(pairs.map((p,i)=>({k:i,h:p[1]}))).map(c=>`<button class="mpi" data-k="${c.k}">${c.h}</button>`).join('')}</div></div>`,api=>{
+  const {q,qa}=api;let selW=null,done=0;
+  q('#mpG').onclick=e=>{const w=e.target.closest('.mpw');
+    if(w){if(w.classList.contains('done'))return;selW=+w.dataset.k;qa('.mpw').forEach(x=>x.classList.toggle('on',x===w));sPop();speak(pairs[selW][0],'en-US');return}
+    const im=e.target.closest('.mpi');if(!im||im.classList.contains('done'))return;
+    if(selW===null){api.say('先點左邊的英文單字。');return}
+    if(+im.dataset.k===selW){im.classList.add('done');q(`.mpw[data-k="${selW}"]`).classList.add('done');selW=null;sGood();done++;
+      if(done===pairs.length)api.ok(okMsg,1800)}
+    else{sBad();shake(im);api.no('圖案跟單字不一樣，再想想看！')}};
+  api.solve(()=>{pairs.forEach((p,i)=>{fire(q(`.mpw[data-k="${i}"]`));fire(q(`.mpi[data-k="${i}"]`))})});
+},840)}
+
+/* ---------- 成語接龍：用前一個成語的最後一個字開頭 ---------- */
+function idiomChain(title,lead,rounds,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="story" style="text-align:center;font-size:28px;font-family:var(--f-hand)" id="icC"></div>
+  <div class="story" style="background:#FFF6D8" id="icQ"></div>
+  <div class="row" id="icO" style="justify-content:center;margin-top:4px"></div>`,api=>{
+  const {q}=api;let i=0,miss=0,solving=false;
+  const show=()=>{const r=rounds[i];q('#icC').innerHTML=`「${r.cur}」`;
+    q('#icQ').innerHTML=`第 ${i+1} 棒：下一個成語要用 <b>「${r.cur[r.cur.length-1]}」</b> 開頭！`;
+    q('#icO').innerHTML=shuffle(r.opts.map(o=>({o,ok:o===r.ans}))).map(x=>`<button class="btn w" data-ok="${x.ok?1:0}" style="min-width:180px;font-family:var(--f-hand);font-size:27px">${x.o}</button>`).join('')};
+  q('#icO').onclick=e=>{const b=e.target.closest('[data-ok]');if(!b)return;
+    if(b.dataset.ok==='1'){b.style.background='#D3E4C7';sGood();i++;
+      if(i>=rounds.length){q('#icQ').textContent='';api.ok(okMsg,2400)}else lockFor(show,1100)}
+    else{miss++;sBad();shake(b);api.no(miss>=2?`提示：要找「${rounds[i].cur[rounds[i].cur.length-1]}」開頭的成語！`:'接錯囉！看看前一個成語的「最後一個字」。')}};show();
+  api.solve(()=>{if(solving)return;solving=true;const go=()=>{if(api.over()||i>=rounds.length)return;const b=q('#icO [data-ok="1"]');
+    if(b){fire(b);setTimeout(go,1300)}else setTimeout(go,400)};go()});
+},760)}
+
+/* ---------- 天平秤重：秤兩次找出比較輕的塑膠假貨 ---------- */
+function balanceFind(title,lead,okMsg){return g2(title,'hmm',`<p class="lead">${lead}</p>
+  <svg id="bfS" viewBox="0 0 900 330" style="width:100%;max-height:290px;display:block"></svg>
+  <div class="row" id="bfB" style="justify-content:center;margin-top:6px;flex-wrap:wrap"></div>`,api=>{
+  const {q}=api;const fake=Math.floor(Math.random()*4);const pan=[null,null];let weigh=0,accuse=false,miss=0;const res=[];
+  const swSt=(x,y,s)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-12 26 Q-17 -8 0 -15 Q17 -8 12 26Z" fill="#DADCDA" stroke="${INK}" stroke-width="3.5"/><path d="M0 -15 q-7 -18 5 -27" stroke="#DADCDA" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M5 -42 l17 3.5 l-17 6z" fill="#3A3A40"/><path d="M-3 -34 l-15 -9 l3.5 9 l-3.5 9z" fill="#B9BCBA"/></g>`;
+  const draw=()=>{const tip=res.length?res[res.length-1][2]:0;
+    q('#bfS').innerHTML=`<rect y="296" width="900" height="34" fill="#C9B085"/>
+    <g transform="rotate(${tip*-4} 450 46)"><path d="M450 46 V296" stroke="${INK}" stroke-width="10"/><path d="M140 46 H760" stroke="${INK}" stroke-width="10"/>
+    <path d="M140 46 L120 ${180+ (tip<0?24:0)} M140 46 L160 ${180+(tip<0?24:0)}" stroke="${INK}" stroke-width="4"/><path d="M760 46 L740 ${180+(tip>0?24:0)} M760 46 L780 ${180+(tip>0?24:0)}" stroke="${INK}" stroke-width="4"/>
+    ${[0,1].map(i=>{const px=i?760:140,py=190+(i? (tip>0?26:0):(tip<0?26:0));return `<g transform="translate(${px} ${py})"><path d="M-92 0 A92 30 0 0 0 92 0Z" fill="#8C6A4E" stroke="${INK}" stroke-width="5"/>${pan[i]!=null?swSt(0,-14,1.15):''}</g>`}).join('')}</g>
+    <text x="450" y="30" text-anchor="middle" font-size="22" font-weight="900" fill="${INK}">⚖️ 真正的燕子雕像是大理石，比較重；假貨是塑膠，比較輕</text>`;
+    q('#bfB').innerHTML=[0,1,2,3].map(i=>`<button class="tool" data-s="${i}" style="font-size:19px;min-height:52px;${accuse?'background:#FFF6D8;border-color:#C86062':''}">${'ABCD'[i]} 號${pan[0]===i?' ⬅左盤':pan[1]===i?' ⬅右盤':''}</button>`).join('')+
+      (accuse?'':'<button class="btn w" id="bfW" '+(weigh>=2||pan[0]==null||pan[1]==null?'disabled':'')+'>秤！（還能秤 '+(2-weigh)+' 次）</button>')+
+      (weigh>0&&!accuse?'<button class="btn c" id="bfA">我要指認假貨</button>':'')};
+  q('#bfB').onclick=e=>{const b=e.target.closest('[data-s]');if(b){const i=+b.dataset.s;
+    if(accuse){if(i===fake){sWin();api.ok(okMsg,2800)}
+      else{miss++;sBad();shake(b);api.no(miss>=2?'提示：回想哪一盤比較輕——輕的那一盤裡面就是假貨！':'不是這一座。想想看，哪一盤「比較輕」？')}return}
+    if(pan[0]===i)pan[0]=null;else if(pan[1]===i)pan[1]=null;else if(pan[0]==null)pan[0]=i;else if(pan[1]==null)pan[1]=i;else{api.say('兩個盤都有東西了，再點一次可以拿下來。');return}
+    sPop();draw();return}
+    if(e.target.closest('#bfW')){weigh++;const L=pan[0],R=pan[1],lr=(L===fake)?-1:(R===fake)?1:0;res.push([L,R,lr]);
+      if(lr===0)api.say('⚖️ 平衡！假貨在「沒有上桌」的雕像裡。');
+      else api.say(lr<0?'⚖️ 左盤翹起來了——左盤比較輕！':'⚖️ 右盤比較輕！');
+      sPop();draw();return}
+    if(e.target.closest('#bfA')){accuse=true;api.say('好，直接點一座你認為是假的雕像！');draw()}};
+  draw();
+  api.solve(()=>{pan[0]=0;pan[1]=1;draw();fire(q('#bfW'));
+    if(res[0][2]===0){pan[0]=2;pan[1]=3;draw();fire(q('#bfW'))}
+    const last=res[res.length-1];accuse=true;
+    fire(q(`#bfB [data-s="${last[2]<0?last[0]:last[1]}"]`))});
+},920)}
+
+/* ---------- 吊橋平衡：左右按住保持平衡走過吊橋 ---------- */
+function bridgeBal(title){return g2(title,'run',`<p class="lead">吊橋搖搖晃晃！按住「◀ 左傾 / 右傾 ▶」幫多叔保持平衡、走到對岸。歪太多會跌一跤（不會失敗，風會變小）。</p>
+  <svg id="bbS" viewBox="0 0 900 380" style="width:100%;max-height:330px;border:4px solid ${INK};border-radius:16px;display:block;background:#BFD9E6"></svg>
+  <div class="row" style="justify-content:center;margin-top:10px"><button class="btn w" id="bbL" style="min-width:160px;min-height:66px;font-size:23px;touch-action:none">◀ 左傾</button><span class="pill" id="bbN"></span><button class="btn w" id="bbR" style="min-width:160px;min-height:66px;font-size:23px;touch-action:none">右傾 ▶</button></div>`,api=>{
+  const {q}=api;let tilt=0,prog=0,hold=0,stumble=0,raf,last=performance.now();
+  const on=(el,v)=>{const d=e=>{e.preventDefault();hold=v};const u=()=>{if(hold===v)hold=0};
+    el.addEventListener('pointerdown',d);['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,u))};
+  on(q('#bbL'),-1);on(q('#bbR'),1);
+  const deckY=x=>236-Math.sin(Math.max(0,Math.min(1,(x-60)/780))*Math.PI)*62;
+  const loop=now=>{if(api.over())return;last=now;
+    const w=stumble>=2?.22:.5;tilt+=(Math.random()-.5)*w+hold*.95-tilt*.025;
+    tilt=Math.max(-42,Math.min(42,tilt));
+    if(Math.abs(tilt)>32){stumble++;sBad();tilt=tilt>0?11:-11;prog=Math.max(0,prog-4);
+      api.say(stumble>=2?'沒關係，風變小了，慢慢調整！':'差點跌下去！快往反方向按！')}
+    else prog=Math.min(100,prog+.06);
+    const dx=110+prog*6.8;
+    let s=`<rect width="900" height="380" fill="#BFD9E6"/><path d="M0 310 Q450 280 900 310 V380 H0Z" fill="#8FA2B3"/><path d="M0 0 H60 V310 H0Z M840 0 H900 V310 H840Z" fill="#DADCDA"/>`;
+    s+=`<path d="M60 236 Q450 174 840 236" stroke="#A57E5E" stroke-width="15" fill="none"/><path d="M60 210 Q450 148 840 210" stroke="#B5432F" stroke-width="6" fill="none"/>`;
+    s+=`${[150,270,390,510,630,750].map(x=>`<line x1="${x}" y1="${deckY(x)}" x2="${x}" y2="${deckY(x)-26}" stroke="#8C6A4E" stroke-width="4"/>`).join('')}`;
+    s+=`<path d="M770 60 l34 9 l-34 9z" fill="#C86062" opacity="${.35+Math.abs(tilt)/70}"/><text x="787" y="94" text-anchor="middle" font-size="16" font-weight="900" fill="${INK}">風</text>`;
+    s+=`<g transform="translate(${dx} ${deckY(dx)-4}) rotate(${tilt/3})"><image href="${COAT.coat_pocket.b}" x="${-62*COAT.coat_pocket.r}" y="-168" width="${150*COAT.coat_pocket.r}" height="168"/></g>`;
+    q('#bbS').innerHTML=s;q('#bbN').textContent=`過橋進度：${Math.floor(prog)}%`;
+    if(prog>=100){api.ok('走到對岸了！平衡感一流！',2000);return}
+    raf=requestAnimationFrame(loop);T2.push(raf)};
+  raf=requestAnimationFrame(loop);T2.push(raf);
+  api.solve(()=>{prog=100});
+},960)}
+
+/* ---------- 數線標記（獨立版，給非實驗台的關卡用） ---------- */
+function numLineSolo(title,lead,o){return g2(title,'think',`<p class="lead">${lead}</p>
+  <div class="labstep" id="lbS"></div><svg id="lbV" viewBox="0 0 900 380" style="width:100%;max-height:300px;display:block;touch-action:none"></svg>
+  <div class="labtray" id="lbT" style="justify-content:center"></div><div class="row" id="lbR" style="justify-content:center"></div>`,api=>{numberLine(api,o)},940)}

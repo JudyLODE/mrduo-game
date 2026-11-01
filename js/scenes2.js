@@ -75,6 +75,8 @@ function bgTaroko(){return `<rect width="1600" height="1000" fill="#BFD9E6"/>
   <!-- river -->
   <path d="M520 760 Q800 720 1080 800 L1180 1000 H420Z" fill="#7FB3CC" stroke="${OL}" stroke-width="6"/>
   <g stroke="#A9CFDF" stroke-width="5" fill="none"><path d="M560 860 q30 -10 60 0 t60 0"/><path d="M820 900 q30 -10 60 0 t60 0"/><path d="M950 830 q30 -10 60 0 t60 0"/></g>
+  <!-- riverbank island -->
+  <path d="M460 1000 Q800 720 1140 1000Z" fill="#B7A288" stroke="${OL}" stroke-width="6"/>
   <!-- suspension bridge -->
   <path d="M380 300 Q800 420 1220 300" stroke="#B5432F" stroke-width="12" fill="none"/><path d="M380 300 Q800 470 1220 300" stroke="#8C6A4E" stroke-width="10" fill="none"/>
   ${Array.from({length:15},(_,i)=>{const x=440+i*50,t=(x-380)/840,y1=300+Math.sin(t*Math.PI)*90,y2=300+Math.sin(t*Math.PI)*150;return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="#B5432F" stroke-width="3"/>`}).join('')}

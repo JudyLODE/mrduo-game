@@ -35,9 +35,9 @@ async def main():
     for step in range(4000):
       if time.time()-t0>900:print('TIMEOUT');break
       if await pg.query_selector('#soonOk'):await shot('soon');print('FINISHED (case %d, reached 未完待續) at step'%CASE,step);break
-      if await ev("!!window.__solve") and await vis('#modal'):
+      if await ev("typeof window.__solve==='function'") and await vis('#modal'):
         nm=await ev("(document.querySelector('#mBody h3')||{}).textContent||'g2'")
-        await pg.wait_for_timeout(700);await shot('g2_'+nm[:12]);await ev("window.__solve()");await pg.wait_for_timeout(2300);continue
+        await pg.wait_for_timeout(700);await shot('g2_'+nm[:12]);await ev("window.__solve&&window.__solve()");await pg.wait_for_timeout(2300);continue
       if await pg.query_selector('.cert'):await shot('cert');print('FINISHED at step',step);break
       if await pg.query_selector('.chap'):await pg.click('.chap');await pg.wait_for_timeout(200);continue
       if await pg.query_selector('.cut'):await shot('cut'+str(step//50));await pg.click('.cut');await pg.wait_for_timeout(300);continue

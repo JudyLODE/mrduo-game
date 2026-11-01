@@ -397,3 +397,23 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 .smw button svg{width:100%;display:block}
 .smw button.lit{transform:translateY(3px);box-shadow:0 1px 0 var(--line);background:#FFF6D8}
 @media (max-width:760px){.cngrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ================= 第三章 太魯閣 新玩法的樣式（低彩度純色） ================= */
+.lg{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center}
+.lgh{font-weight:900;font-size:17px;padding:4px 6px;text-align:center}
+.lgc{min-height:54px;border:3px solid var(--line);border-radius:12px;background:#FFFFFF;font-size:26px;font-weight:900;box-shadow:0 3px 0 var(--line)}
+.lgc.on{background:#D3E4C7;color:#4C894F}
+.lgc.off{background:#F6D3D3;color:#C86062}
+.cpcard{display:flex;flex-direction:column;align-items:center;gap:4px;background:#FFFFFF;border:3px solid var(--line);border-radius:14px;padding:8px 12px;box-shadow:0 4px 0 var(--line)}
+.cpcard b{font-size:19px}
+.cpchar{border:3px solid #C86062;border-radius:8px;padding:0 8px;font-size:26px;font-weight:900;color:#C86062}
+.cslots{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.cslots button{width:76px;height:76px;border:4px dashed var(--line);border-radius:14px;background:#FFFDF6;font-size:40px;font-weight:900}
+.mp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mpw{display:flex;align-items:center;gap:10px;width:100%;background:#FFFFFF;border:3px solid var(--line);border-radius:14px;padding:8px 14px;margin:6px 0;box-shadow:0 3px 0 var(--line)}
+.mpw b{font:700 24px var(--f-en)}
+.mpw small{color:var(--ink2);font-weight:900}
+.mpw.on{background:#FFF6D8}
+.mpw.done{background:#D3E4C7;opacity:.6}
+.mpi{display:block;width:100%;background:#FFFDF6;border:3px solid var(--line);border-radius:14px;padding:8px;margin:6px 0;box-shadow:0 3px 0 var(--line)}
+.mpi.done{background:#D3E4C7;opacity:.6}
