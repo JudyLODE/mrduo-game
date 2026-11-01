@@ -85,7 +85,7 @@ function testimony(title,lines,cards,lie,need,okMsg){return g2(title,'hmm',`<p c
 /* ---------- 化學實驗台：預測 → 放材料 → 動手做 → 看結果 → 對照預測 ---------- */
 function labBench(c){return g2(c.title,'think',`<div class="labstep" id="lbS"></div><div class="labgrid"><svg id="lbV" viewBox="0 0 900 380" style="width:100%;max-height:340px;touch-action:none"></svg><div class="labtray" id="lbT"></div></div>
   <div class="row" id="lbR"></div>`,api=>{const {q}=api;
-    const st={phase:'predict',guess:null,need:c.place.map(p=>p.slice()),sel:null,cups:c.cups.map(x=>({label:x.label,items:[],color:x.color||'#D9EEF5'})),prog:0,done:false};
+    const st={phase:'predict',guess:null,need:c.place.map(p=>p.slice()),put:[],sel:null,cups:c.cups.map(x=>({label:x.label,items:[],color:x.color||'#D9EEF5'})),prog:0,done:false};
     const cx=i=>150+i*(600/(c.cups.length-1||1));
     const drawCups=()=>{let s=`<rect x="0" y="300" width="900" height="80" fill="#C9A878"/>`;
       st.cups.forEach((u,i)=>{const x=cx(i),fin=st.done&&c.cups[i].res;const col=fin&&fin.color||u.color;
@@ -103,7 +103,7 @@ function labBench(c){return g2(c.title,'think',`<div class="labstep" id="lbS"></
     const step=(t)=>q('#lbS').innerHTML=t;
     const predict=()=>{step(`<b>① 先猜猜看</b>　${c.predict.q}<small>猜錯也沒關係，科學家也常常猜錯。</small>`);
       q('#lbT').innerHTML=c.predict.o.map((o,i)=>`<button class="btn w" data-g="${i}">${o}</button>`).join('');drawCups()};
-    const setup=()=>{st.phase='setup';step(`<b>② 放材料</b>　${c.setupTip}<small>先點右邊的材料，再點杯子。</small>`);
+    const setup=()=>{st.phase='setup';step(`<b>② 放材料</b>　${c.setupTip}<small>先點右邊的材料，再點杯子。放錯了？點杯子裡的東西就能拿回來。</small>`);
       q('#lbT').innerHTML=c.tray.map(t=>`<button class="labitem" data-t="${t[0]}">${ico(t[1],34)}<span>${t[2]}</span></button>`).join('');drawCups()};
     const act=()=>{st.phase='stir';st.prog=0;step(`<b>③ 動手做</b>　${c.act}`);q('#lbT').innerHTML=c.actBtn?`<button class="btn c" id="lbH">${c.actBtn}</button>`:'';drawCups();
       if(c.actBtn){let h=null;const b=q('#lbH');const go=()=>{h=setInterval(()=>{st.prog+=.04;drawCups();if(st.prog>=1){clearInterval(h);result()}},50);T2.push(h)};
@@ -119,10 +119,14 @@ function labBench(c){return g2(c.title,'think',`<div class="labstep" id="lbS"></
         if(c.after)c.after(api);else api.ok('化學魔法卡到手！')}};
     q('#lbT').onclick=e=>{const g=e.target.closest('[data-g]');if(g&&st.phase==='predict'){st.guess=+g.dataset.g;sPop();setup();return}
       const it=e.target.closest('.labitem');if(it&&st.phase==='setup'){st.sel=it.dataset.t;api.qa('.labitem').forEach(x=>x.classList.toggle('on',x===it));sPop()}};
-    q('#lbV').addEventListener('click',e=>{if(st.phase!=='setup')return;const g=e.target.closest('[data-cup]');if(!g)return;if(!st.sel){api.say('先點一樣材料。');return}
-      const i=+g.dataset.cup,k=st.need.findIndex(p=>p[0]===st.sel&&p[1]===i);
-      if(k<0){api.no(c.wrongPlace||'這個杯子不用放這個喔。');return}
-      st.need.splice(k,1);st.cups[i].items.push(c.tray.find(t=>t[0]===st.sel)[1]);sPop();drawCups();api.say('');if(!st.need.length)act()});
+    q('#lbV').addEventListener('click',e=>{if(st.phase!=='setup')return;const g=e.target.closest('[data-cup]');if(!g)return;const i=+g.dataset.cup;
+      if(!st.sel){const back=st.put.map((p,k)=>[p,k]).filter(([p])=>p.i===i).pop();
+        if(back){st.put.splice(back[1],1);st.cups[i].items.pop();st.need.push([back[0].k,i]);sPop();drawCups();api.say('拿回來了，重新放沒關係。');return}
+        api.say('先點一樣右邊的材料。');return}
+      const k=st.need.findIndex(p=>p[0]===st.sel&&p[1]===i);
+      if(k<0){const left=st.need.filter(p=>p[1]===i).map(p=>c.tray.find(t=>t[0]===p[0])[2]);
+        api.no((left.length?`「${st.cups[i].label}」還需要：${left.join('、')}。`:'這個杯子已經放滿囉。')+(c.wrongPlace?`　${c.wrongPlace}`:''));return}
+      st.need.splice(k,1);st.cups[i].items.push(c.tray.find(t=>t[0]===st.sel)[1]);st.put.push({k:st.sel,i});sPop();drawCups();api.say('');if(!st.need.length)act()});
     predict();
     api.solve(()=>{if(st.phase==='predict')fire(q('[data-g="0"]'));st.need.forEach(p=>st.cups[p[1]].items.push(c.tray.find(t=>t[0]===p[0])[1]));st.need=[];result();fire(q('#lbN'));if(c.after&&window.__solve)window.__solve()});
   },980)}
@@ -254,11 +258,11 @@ function waveRun(title,need=8){return g2(title,'run',`<p class="lead">怪盜X沿
   <svg id="wrS" viewBox="0 0 1000 380" style="width:100%;max-height:380px;border:4px solid ${INK};border-radius:16px;touch-action:none"></svg>
   <div class="row" style="justify-content:center;margin-top:10px"><span class="pill" id="wrN"></span><button class="btn c" id="wrJ" style="min-width:220px;min-height:70px;font-size:26px">跳！</button></div>`,api=>{
     const {q}=api;let y=0,vy=0,waves=[],passed=0,hit=0,t0=performance.now(),last=t0,next=900,speed=.42,inv=0,raf;
-    const jump=()=>{if(y===0){vy=.95;tone([520,660],.05)}};
+    const jump=()=>{if(y===0){vy=1.3;tone([520,660],.05)}};
     q('#wrJ').onclick=jump;q('#wrS').addEventListener('pointerdown',jump);
     const loop=now=>{const dt=Math.min(40,now-last);last=now;next-=dt;
       if(next<=0){waves.push({x:1040});next=1100+Math.random()*900}
-      if(y>0||vy>0){y+=vy*dt*.55;vy-=.0042*dt;if(y<=0){y=0;vy=0}}
+      if(y>0||vy>0){y+=vy*dt*.55;vy-=.0038*dt;if(y<=0){y=0;vy=0}}
       waves.forEach(w=>w.x-=speed*dt);
       waves=waves.filter(w=>{if(!w.hit&&w.x<230&&w.x>150&&y<60){w.hit=1;hit++;inv=500;sBad();if(hit>=3)speed=.32}if(w.x<120&&!w.cnt){w.cnt=1;if(!w.hit){passed++;tone([880],.04)}}return w.x>-80});
       inv=Math.max(0,inv-dt);
