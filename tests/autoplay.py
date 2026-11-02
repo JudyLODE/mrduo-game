@@ -33,7 +33,7 @@ async def main():
     async def vis(sel):return await ev(f"(()=>{{const e=document.querySelector({json.dumps(sel)});return !!e&&!e.closest('[hidden]')&&getComputedStyle(e).display!=='none'}})()")
     t0=time.time();last=''
     for step in range(4000):
-      if time.time()-t0>900:print('TIMEOUT');break
+      if time.time()-t0>1800:print('TIMEOUT');break
       if await pg.query_selector('#soonOk'):await shot('soon');print('FINISHED (case %d, reached 未完待續) at step'%CASE,step);break
       if await ev("typeof window.__solve==='function'") and await vis('#modal'):
         nm=await ev("(document.querySelector('#mBody h3')||{}).textContent||'g2'")

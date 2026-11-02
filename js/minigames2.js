@@ -551,9 +551,9 @@ function digDiv(title,lead,okMsg){const N=12,COL=['#C86062','#D4BB49','#5B84AB',
 },920)}
 
 /* ---------- 邏輯推理格：✓ ✗ 推出誰走哪條步道 ---------- */
-function logicGrid(title,lead,people,trails,clues,sol,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+function logicGrid(title,lead,people,trails,clues,sol,okMsg,hintM){return g2(title,'think',`<p class="lead">${lead}</p>
   <div class="mgrid" style="align-items:start"><div><div class="story"><b>線索：</b><ul style="margin:6px 0 0;padding-left:22px;line-height:1.9;font-size:18px">${clues.map(c=>`<li>${c}</li>`).join('')}</ul></div>
-  <div class="story" style="margin-top:10px;background:#FFF6D8">每個人走一條不同的步道。點格子可以切換：？→ ✓ → ✗。</div></div>
+  <div class="story" style="margin-top:10px;background:#FFF6D8">點格子可以切換：？ → ✓ → ✗。依照左邊的線索，把正確的答案標出來。</div></div>
   <div><div class="lg" id="lgG" style="grid-template-columns:auto repeat(${trails.length},1fr)"><div class="lgh"></div>${trails.map(t=>`<div class="lgh">${t}</div>`).join('')}${people.map((p,pi)=>`<div class="lgh">${p}</div>${trails.map((_,ti)=>`<button class="lgc" data-p="${pi}" data-t="${ti}">？</button>`).join('')}`).join('')}</div>
   <div class="row" style="justify-content:center;margin-top:10px"><button class="btn c" id="lgOk">推理好了</button></div></div></div>`,api=>{
   const {q,qa}=api;const mark={};let miss=0;
@@ -564,7 +564,7 @@ function logicGrid(title,lead,people,trails,clues,sol,okMsg){return g2(title,'th
     people.forEach((_,pi)=>trails.forEach((_,ti)=>{const m=mark[pi+'-'+ti];if((sol[pi]===ti)?m!=='✓':m==='✓')bad=[pi,ti]}));
     if(!bad){sWin();api.ok(okMsg,3000)}
     else{miss++;sBad();shake(q(`[data-p="${bad[0]}"][data-t="${bad[1]}"]`));
-      api.no(miss>=2?'提示：先用「獼猴巡山員走燕子口」，再想想剩下兩個人怎麼分。':'有格子跟線索矛盾，再想想看！')}};
+      api.no(miss>=2?(hintM||'提示：先用「獼猴巡山員走燕子口」，再想想剩下兩個人怎麼分。'):'有格子跟線索矛盾，再想想看！')}};
   api.solve(()=>{people.forEach((_,pi)=>trails.forEach((_,ti)=>{const b=q(`[data-p="${pi}"][data-t="${ti}"]`);mark[pi+'-'+ti]=sol[pi]===ti?'✓':'✗';b.textContent=mark[pi+'-'+ti];b.className='lgc'+(sol[pi]===ti?' on':' off')}));fire(q('#lgOk'))});
 },900)}
 
@@ -976,4 +976,212 @@ function balloonRide(title){return g2(title,'run',`<p class="lead">怪盜X 搭�
     raf=requestAnimationFrame(loop);T2.push(raf)};
   raf=requestAnimationFrame(loop);T2.push(raf);
   api.solve(()=>{bx=820;by=190;catchT=9999});
+},960)}
+
+/* ================= 最終章 墾丁 的新玩法（生物自然／音樂／藝術／歷史／地理） ================= */
+
+/* ---------- 燈號解碼：看長短閃光，對照密碼表解出 HELP（英文＋自然：光） ---------- */
+function morseLight(title,lead,rounds,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <svg id="moS" viewBox="0 0 900 340" style="width:100%;max-height:290px;border:4px solid ${INK};border-radius:16px;display:block;background:#2F3858"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="story" id="moQ" style="flex:1;min-width:230px"></span><button class="tool" id="moHear">再看一次閃燈</button></div>
+  <div class="row" id="moO" style="justify-content:center"></div>`,api=>{
+  const {q}=api;let i=0,phase='watch',miss=0;
+  const chart='密碼表：H＝短短短短　E＝短　L＝短長短短　P＝短長長短';
+  const draw=(lit=0)=>{q('#moS').innerHTML=`<circle cx="150" cy="90" r="4" fill="#F7F0DE"/><circle cx="700" cy="60" r="3" fill="#F7F0DE"/><circle cx="450" cy="40" r="3" fill="#F7F0DE"/>
+   <g transform="translate(450 300)"><path d="M-30 0 L-20 -190 H20 L30 0Z" fill="#F4F1E8" stroke="${INK}" stroke-width="5"/><rect x="-24" y="-232" width="48" height="42" fill="#3B3F4F" stroke="${INK}" stroke-width="5"/><circle id="moL" cy="-211" r="15" fill="${lit?'#F2E6B8':'#8A8F98'}"/>${lit?`<circle cy="-211" r="34" fill="#F2E6B8" opacity=".4"/>`:''}</g>
+   <text x="450" y="30" text-anchor="middle" font-size="19" font-weight="900" fill="#F7F0DE">${chart}</text>`};
+  const play=async()=>{if(api.over())return;phase='watch';q('#moO').innerHTML='';q('#moQ').innerHTML=`第 ${i+1} 個字母：仔細看燈塔的閃燈（長閃「－」、短閃「·」）`;
+    await sleep(700);if(api.over())return;
+    for(const ch of rounds[i].code){draw(1);tone([ch==='長'?440:660],.02,'sine',.2);await sleep(ch==='長'?620:230);draw(0);await sleep(260);if(api.over())return}
+    phase='input';q('#moQ').innerHTML=`第 ${i+1} 個字母：剛剛的閃燈是密碼表裡的哪一個字母？`;
+    q('#moO').innerHTML=shuffle(rounds.map(r=>({l:r.ans})).filter((v,k,a)=>a.findIndex(x=>x.l===v.l)===k)).map(x=>`<button class="btn c" data-l="${x.l}" style="min-width:110px;font-family:var(--f-en);font-size:26px">${x.l}</button>`).join('')};
+  q('#moHear').onclick=()=>{if(phase!=='input')play()};
+  q('#moO').onclick=e=>{const b=e.target.closest('[data-l]');if(!b||phase!=='input')return;
+    if(b.dataset.l===rounds[i].ans){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,2600)}else{api.say('對了！','ok');lockFor(play,1100)}}
+    else{miss++;sBad();shake(b);api.no(miss>=2?'對照上面的密碼表：短閃是「·」，長閃是「－」。':'再看看密碼表，數數長閃和短閃！')}};draw();
+  api.solve(()=>{i=rounds.length;api.ok(okMsg,2600)});
+},920)}
+
+/* ---------- 魚兒觀察室：看特徵找出指定的魚（生物） ---------- */
+function fishID(title,lead,rounds,okMsg){const F={
+ parrot:`<g><ellipse rx="30" ry="18" fill="#7FB98A" stroke="${INK}" stroke-width="3.5"/><path d="M28 0 l16 -10 v20z" fill="#5DA17D" stroke="${INK}" stroke-width="3"/><path d="M14 6 q6 6 2 12" stroke="#E5EFDF" stroke-width="5" fill="none"/><circle cx="-16" cy="-4" r="4" fill="${INK}"/></g>`,
+ butterfly:`<g><ellipse rx="26" ry="20" fill="#F2C14E" stroke="${INK}" stroke-width="3.5"/><path d="M-8 -18 L8 18 M8 -18 L-4 18" stroke="#3A3A40" stroke-width="4"/><path d="M24 0 l14 -8 v16z" fill="#D9A83C" stroke="${INK}" stroke-width="3"/><circle cx="-12" cy="-6" r="4" fill="${INK}"/><path d="M-20 -14 q-6 -10 2 -14" stroke="${INK}" stroke-width="3" fill="none"/></g>`,
+ lion:`<g><ellipse rx="26" ry="16" fill="#D98C5F" stroke="${INK}" stroke-width="3.5"/>${[-14,-6,2,10].map(x=>`<path d="M${x} -14 q4 14 0 28" stroke="#8C4436" stroke-width="4" fill="none"/>`).join('')}<path d="M22 -4 l18 -14 v30z" fill="#C8764A" stroke="${INK}" stroke-width="3"/>${[-2,8].map(y=>`<path d="M-6 ${y} L-26 ${y-12} M-6 ${y} L-26 ${y+12}" stroke="#8C4436" stroke-width="3"/>`).join('')}<circle cx="-14" cy="-4" r="4" fill="${INK}"/></g>`,
+ demoiselle:`<g><ellipse rx="16" ry="12" fill="#5B84AB" stroke="${INK}" stroke-width="3.5"/><path d="M14 0 l20 -6 v12z" fill="#3E5A7A" stroke="${INK}" stroke-width="3"/><path d="M-2 -10 l-8 -12 M6 -10 l2 -14" stroke="#5B84AB" stroke-width="3"/><circle cx="-8" cy="-3" r="3.5" fill="${INK}"/></g>`};
+ return g2(title,'hmm',`<p class="lead">${lead}</p>
+  <svg id="fiS" viewBox="0 0 900 340" style="width:100%;max-height:290px;border:4px solid ${INK};border-radius:16px;display:block;background:#5B9BC2"></svg>
+  <div class="story" id="fiQ" style="margin-top:8px"></div>`,api=>{
+  const {q}=api;let i=0,miss=0;
+  const POS={parrot:[200,120],butterfly:[450,90],lion:[680,150],demoiselle:[330,240]};
+  const draw=()=>{q('#fiS').innerHTML=`<rect y="280" width="900" height="60" fill="#D9C7A3"/>${[[120,300],[520,310],[760,295]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="46" ry="18" fill="#8FA88A"/>`).join('')}${Object.entries(POS).map(([k,[x,y]])=>`<g data-f="${k}" style="cursor:pointer" transform="translate(${x} ${y}) scale(1.4)"><g class="breathe">${F[k]}</g></g>`).join('')}`};
+  const ask=()=>{if(i>=rounds.length)return;q('#fiQ').innerHTML=`第 ${i+1} 題：${rounds[i].clue}`};
+  q('#fiS').onclick=e=>{const g=e.target.closest('[data-f]');if(!g)return;
+    if(g.dataset.f===rounds[i].fish){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,3000)}else{api.say('找到了！','ok');lockFor(ask,1000)}}
+    else{miss++;sBad();shake(g);api.no(miss>=2?'提示：仔細看題目說的「顏色、形狀、花紋」。':'不是這一隻，再觀察看看！')}};draw();ask();
+  api.solve(()=>{for(const r of rounds.slice(i)){fire(q(`#fiS [data-f="${r.fish}"]`))}});
+},920)}
+
+/* ---------- 潮間帶：把生物放到正確的分帶（生物） ---------- */
+function tideZones(title,lead,zones,items,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:center"><svg id="tzS" viewBox="0 0 560 400" style="width:100%;max-height:340px;border:4px solid ${INK};border-radius:16px;display:block"></svg>
+  <div><div class="story">潮水每天來來回回，把海岸分成三個家。<small>先點一個生物，再點牠的家。</small></div><div class="row" id="tzI" style="justify-content:center;margin-top:10px"></div></div></div>`,api=>{
+  const {q}=api;const put=items.map(()=>-1);let sel=null,miss=0;
+  const draw=()=>{let s=`<rect x="40" width="480" height="96" fill="#C9B085"/><rect x="40" y="96" width="480" height="120" fill="#8A9B7A"/><rect x="40" y="216" width="480" height="184" fill="#5B9BC2"/>`;
+    zones.forEach((Z,k)=>{s+=`<g data-z="${k}" style="cursor:pointer"><rect x="40" y="${[0,96,216][k]}" width="480" height="${[96,120,184][k]}" fill="none" stroke="${INK}" stroke-width="3" stroke-dasharray="8 6"/><text x="270" y="${[60,160,310][k]}" text-anchor="middle" font-size="21" font-weight="900" fill="${k===2?'#FFFDF6':INK}">${Z}</text>${items.map((it,n)=>put[n]===k?`<text x="${120+(n*83)%320}" y="${[78,182,330][k]}" font-size="30">${it.e}</text>`:'').join('')}</g>`});
+    q('#tzS').innerHTML=s;
+    q('#tzI').innerHTML=items.map((it,n)=>put[n]>=0?'':`<button class="labitem${sel===n?' on':''}" data-n="${n}"><span style="font-size:26px">${it.e}</span><span>${it.n}</span></button>`).join('')};
+  q('#tzI').onclick=e=>{const b=e.target.closest('[data-n]');if(!b)return;sel=+b.dataset.n;sPop();draw()};
+  q('#tzS').onclick=e=>{const g=e.target.closest('[data-z]');if(!g)return;if(sel===null){api.say('先點右邊的一個生物。');return}
+    const k=+g.dataset.z,it=items[sel];
+    if(k===it.z){put[sel]=k;sel=null;sGood();draw();if(put.every(v=>v>=0))api.ok(okMsg,3200)}
+    else{miss++;sBad();shake(g);api.no(miss>=2?`提示：${it.hint}`:'想一想：潮水會不會淹到牠的家？')}};draw();
+  api.solve(()=>{items.forEach((it,n)=>{fire(q(`#tzI [data-n="${n}"]`));fire(q(`#tzS [data-z="${it.z}"]`))})});
+},920)}
+
+/* ---------- 紫光掃描：照照看哪些東西會發亮（自然：螢光，章核心） ---------- */
+function uvScan(title,lead,items,okMsg){return g2(title,'hmm',`<p class="lead">${lead}</p>
+  <div class="story" id="uvQ">天黑了……拿起紫光燈，一個一個點點看，哪些東西會發出螢光？</div>
+  <svg id="uvS" viewBox="0 0 900 330" style="width:100%;max-height:290px;border:4px solid ${INK};border-radius:16px;display:block;background:#1B2030"></svg>`,api=>{
+  const {q}=api;const seen=new Set();let miss=0;
+  const draw=(flash=-1)=>{q('#uvS').innerHTML=`<rect width="900" height="330" fill="#1B2030"/><rect y="270" width="900" height="60" fill="#3E4450"/>`+
+    items.map((it,n)=>{const x=it.x,y=it.y,glow=it.g&&seen.has(n);
+      return `<g data-u="${n}" style="cursor:pointer"><ellipse cx="${x}" cy="${y+22}" rx="40" ry="10" fill="#0F1420"/>${seen.has(n)?it.art:`<g opacity=".55">${it.dim}</g>`}${glow?`<circle cx="${x}" cy="${y}" r="52" fill="${it.glowC||'#B8F59A'}" opacity=".3"/><circle cx="${x}" cy="${y}" r="34" fill="none" stroke="${it.glowC||'#B8F59A'}" stroke-width="5" stroke-dasharray="8 8"/>`:''}${flash===n?`<path d="M450 330 L${x-40} ${y-40} L${x+40} ${y+40}Z" fill="#BFA0E9" opacity=".3"/>`:''}</g>`}).join('')};
+  q('#uvS').onclick=e=>{const g=e.target.closest('[data-u]');if(!g)return;const n=+g.dataset.u;if(seen.has(n))return;
+    seen.add(n);const it=items[n];draw(n);sPop();
+    if(it.g){sGood();tone([784],.15,'sine',.14);api.say(`${it.n}發亮了！`)}
+    else{api.say(`${it.n}不會發亮。`)}
+    if(seen.size>=items.length){sWin();lockFor(()=>api.ok(okMsg,3600),900)}};
+  draw();
+  api.solve(()=>{items.forEach((it,n)=>fire(q(`#uvS [data-u="${n}"]`)))});
+},920)}
+
+/* ---------- 風往哪吹：落山風與風吹砂（地理） ---------- */
+function windBlow(title,lead,rounds,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="wbS" viewBox="0 0 900 300" style="width:100%;max-height:260px;border:4px solid ${INK};border-radius:16px;display:block;background:#CFE3EC"></svg>
+  <div class="story" id="wbQ" style="margin-top:8px"></div>
+  <div class="row" id="wbO" style="justify-content:center"></div>`,api=>{
+  const {q}=api;let i=0,miss=0;
+  const map=()=>`<path d="M60 240 L140 90 L230 170 L320 70 L420 240Z" fill="#8A93A8" stroke="${INK}" stroke-width="4"/><text x="230" y="200" text-anchor="middle" font-size="17" font-weight="900" fill="#FFFDF6">中央山脈</text>
+   <path d="M420 240 Q560 200 700 240 L700 300 H420Z" fill="#D9C7A3" stroke="${INK}" stroke-width="4"/><text x="560" y="272" text-anchor="middle" font-size="17" font-weight="900" fill="${INK}">恆春半島</text>
+   <text x="790" y="270" font-size="16" font-weight="900" fill="#2B79B5">太平洋</text>
+   <path d="M740 60 q14 -14 28 0 q14 -14 28 0" stroke="#2B79B5" stroke-width="4" fill="none"/>`;
+  const windNE=`<g><path d="M600 30 h-90" stroke="#C86062" stroke-width="7" stroke-linecap="round"/><path d="M520 30 l18 -10 v20z" fill="#C86062"/><text x="640" y="38" font-size="16" font-weight="900" fill="#C86062">冬天東北季風</text></g>`;
+  const ask=()=>{if(i>=rounds.length)return;q('#wbS').innerHTML=map()+windNE+rounds[i].extra;q('#wbQ').innerHTML=`<b>第 ${i+1} 題：</b>${rounds[i].q}`;
+    q('#wbO').innerHTML=rounds[i].opts.map((o,k)=>`<button class="btn w" data-k="${k}" style="min-width:230px">${o}</button>`).join('')};
+  q('#wbO').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;
+    if(+b.dataset.k===rounds[i].ans){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,3200)}else{api.say('對了！','ok');lockFor(ask,1200)}}
+    else{miss++;sBad();shake(b);api.no(miss>=2?`提示：${rounds[i].hint}`:'想想看風被高山擋住以後，會往哪裡跑？')}};ask();
+  api.solve(()=>{for(const r of rounds.slice(i)){fire(q(`#wbO [data-k="${r.ans}"]`))}});
+},900)}
+
+/* ---------- 民謠聆聽：聽「思想起」旋律，找出對的樂譜（音樂，高年級） ---------- */
+function folkTune(title,lead,okMsg){const MEL=[[392,440,523,440,392,'起來'],[330,392,330,294,330,'搖籃'],[523,587,659,587,523,'山嶺']];
+ const strip=m=>{const W=[262,294,330,392,440,523,587,659],Y=n=>150-W.indexOf(n)*16;
+  return `<svg viewBox="0 0 560 150" style="width:100%;max-height:100px;display:block">${[0,1,2,3,4].map(k=>`<line x1="30" y1="${40+k*16}" x2="530" y2="${40+k*16}" stroke="#C9C3BB" stroke-width="2"/>`).join('')}${m.slice(0,5).map((n,k)=>`<circle cx="${80+k*100}" cy="${Y(n)}" r="12" fill="#C86062" stroke="${INK}" stroke-width="3"/>`).join('')}</svg>`};
+ return g2(title,'welcome',`<p class="lead">${lead}</p>
+  <div class="story" id="ftQ">恆春民謠「思想起」——爺爺說，以前的移民想家時就唱這首。仔細聽！</div>
+  <div class="row" style="justify-content:center"><button class="btn c" id="ftPlay">▶ 再聽一次</button></div>
+  <div class="row" id="ftO" style="justify-content:center;align-items:stretch"></div>`,api=>{
+  const {q}=api;const target=shuffle(MEL.map((m,k)=>k));let step=0,miss=0,cur=target[0];
+  const play=async()=>{if(api.over())return;
+    for(const n of MEL[cur].slice(0,5)){tone([n],.26,'triangle',.18);await sleep(330);if(api.over())return}};
+  const ask=()=>{if(step>=3)return;q('#ftQ').innerHTML=`第 ${step+1} 句：剛剛唱的旋律，是哪一張樂譜？`;
+    q('#ftO').innerHTML=target.map((mi,k)=>`<button class="ftstrip" data-k="${k}">${strip(MEL[mi])}</button>`).join('')};
+  q('#ftPlay').onclick=play;
+  q('#ftO').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;
+    if(target[+b.dataset.k]===cur){sGood();step++;
+      if(step>=3){api.ok(okMsg,3000)}else{cur=target[step];api.say('對了！','ok');lockFor(()=>{ask();play()},1300)}}
+    else{miss++;sBad();shake(b);api.no(miss>=2?'提示：注意聽「最高音」出現在第幾個，再去比對圓點的位置。':'再聽一次，看圓點的高低跟歌聲像不像！')}};ask();play();
+  api.solve(()=>{for(let s2=step;s2<3;s2++){const k=target.indexOf(cur);fire(q(`#ftO [data-k="${k}"]`))}});
+},920)}
+
+/* ---------- 照譜彈琴：看譜依序撥月琴的弦（音樂＋藝術） ---------- */
+function yueqin(title,lead,score,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:center"><svg id="yqS" viewBox="0 0 420 400" style="width:100%;max-height:330px"></svg>
+  <div><div class="story" id="yqSc"></div><div class="row" style="justify-content:center;margin-top:12px"><button class="btn c" data-s="1" style="min-width:150px;font-size:22px">① 低音弦</button><button class="btn c" data-s="2" style="min-width:150px;font-size:22px">② 高音弦</button></div>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="yqN"></span></div></div></div>`,api=>{
+  const {q}=api;let step=0,miss=0;
+  const draw=()=>{q('#yqS').innerHTML=`<g transform="translate(210 210)"><circle r="140" fill="#C86062" stroke="${INK}" stroke-width="7"/><circle r="118" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="6 8"/><path d="M0 -140 V-196 M0 -196 q-16 -10 0 -22 q16 12 0 22" stroke="#946F4B" stroke-width="9" fill="#946F4B"/><line x1="-30" y1="-118" x2="-30" y2="118" stroke="#F2E6B8" stroke-width="5"/><line x1="30" y1="-118" x2="30" y2="118" stroke="#F2E6B8" stroke-width="5"/>${score.map((s,k)=>k<step?`<circle cx="${s===1?-30:30}" cy="${100-(k%4)*40}" r="10" fill="#D4BB49" stroke="${INK}" stroke-width="3"/>`:'').join('')}</g>`;
+    q('#yqSc').innerHTML=`照著譜，從左到右彈：<br><b style="font-size:30px;letter-spacing:8px">${score.map((s,k)=>k===step?`<span style="color:#C86062">【${s===1?'①':'②'}】</span>`:`<span style="opacity:${k<step?.4:1}">${s===1?'①':'②'}</span>`).join(' ')}</b>`;
+    q('#yqN').textContent=`彈到第 ${step}/${score.length} 音`};
+  q('#yqS');
+  api.b.onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;
+    if(+b.dataset.s===score[step]){tone([score[step]===1?262:392],.2,'triangle',.18);step++;sPop();draw();
+      if(step>=score.length){tone(score.map(s=>s===1?262:392),.18,'triangle',.14);api.ok(okMsg,3200)}}
+    else{miss++;sBad();api.no(miss>=2?'提示：看譜上圈起來的數字，① 是低音弦、② 是高音弦。':'撥錯弦了，看譜上的下一個數字！')}};draw();
+  api.solve(()=>{for(let s=step;s<score.length;s++)fire(q(`[data-s="${score[s]}"]`))});
+},880)}
+
+/* ---------- 圖騰規律：排灣族紋樣找規律（藝術＋文化，高年級） ---------- */
+function totemPattern(title,lead,rounds,okMsg){const SY={
+ snake:`<path d="M0 -14 L10 0 L0 14 L-10 0Z" fill="#C86062" stroke="${INK}" stroke-width="3"/><path d="M-3 -6 l6 6 l-6 6" stroke="#FFFDF6" stroke-width="2.5" fill="none"/>`,
+ human:`<circle cy="-8" r="5" fill="#F2C9A0" stroke="${INK}" stroke-width="2.5"/><path d="M0 -3 V12 M-9 2 H9 M0 12 L-7 22 M0 12 L7 22" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`,
+ sun:`<circle r="8" fill="#D4BB49" stroke="${INK}" stroke-width="3"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="${Math.cos(deg(a))*11}" y1="${Math.sin(deg(a))*11}" x2="${Math.cos(deg(a))*20}" y2="${Math.sin(deg(a))*20}" stroke="#D4BB49" stroke-width="4" stroke-linecap="round"/>`).join('')}`};
+ return g2(title,'think',`<p class="lead">${lead}</p>
+  <svg id="ttS" viewBox="0 0 900 200" style="width:100%;max-height:170px;display:block"></svg>
+  <div class="story" id="ttQ" style="margin-top:8px"></div>
+  <div class="row" id="ttO" style="justify-content:center"></div>`,api=>{
+  const {q}=api;let i=0,miss=0;
+  const ask=()=>{if(i>=rounds.length)return;const r=rounds[i];
+    q('#ttS').innerHTML=`<rect x="20" y="30" width="860" height="120" rx="14" fill="#F7F0E1" stroke="${INK}" stroke-width="5"/>`+r.seq.map((s,k)=>`<g transform="translate(${100+k*115} 90) scale(1.3)">${s==='？'?`<circle r="24" fill="#FFF6D8" stroke="#C86062" stroke-width="4" stroke-dasharray="6 5"/>`:SY[s]}</g>`).join('');
+    q('#ttQ').innerHTML=`第 ${i+1} 題：空白處應該放哪一個圖騰？`;
+    q('#ttO').innerHTML=r.opts.map((o,k)=>`<button class="btn w" data-k="${k}" style="min-width:130px">${{snake:'百步蛇紋',human:'人形紋',sun:'太陽紋'}[o]}</button>`).join('')};
+  q('#ttO').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;
+    if(rounds[i].opts[+b.dataset.k]===rounds[i].ans){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,3000)}else{api.say('規律找到了！','ok');lockFor(ask,1100)}}
+    else{miss++;sBad();shake(b);api.no(miss>=2?'提示：把圖騰念出來（蛇、人、蛇、人……），找重複的節奏。':'想一想：圖案是怎麼重複的？')}};ask();
+  api.solve(()=>{for(const r of rounds.slice(i)){fire(q(`#ttO [data-k="${r.opts.indexOf(r.ans)}"]`))}});
+},900)}
+
+/* ---------- 數龜蛋窩：平分蛋與乘法（數學＋生物保育） ---------- */
+function turtleNest(title,lead,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="tnS" viewBox="0 0 900 330" style="width:100%;max-height:290px;border:4px solid ${INK};border-radius:16px;display:block;background:#3E5A7A"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="story" id="tnQ" style="flex:1;min-width:230px"></span></div>
+  <div class="row" id="tnK" style="justify-content:center"></div>`,api=>{
+  const {q}=api;const NX=[200,450,700];let phase='split',sel=null,miss=0;const home=[-1,-1,-1,-1,-1,-1,-1,-1,-1];
+  const egg=(x,y)=>`<g transform="translate(${x} ${y})"><ellipse rx="14" ry="17" fill="#F2EBDD" stroke="${INK}" stroke-width="3"/></g>`;
+  const draw=()=>{let s=`<rect y="240" width="900" height="90" fill="#C9B48E"/>`;
+    NX.forEach((x,k)=>{const n=home.filter(h=>h===k).length;s+=`<g data-n="${k}" style="cursor:pointer"><ellipse cx="${x}" cy="270" rx="95" ry="34" fill="#B09B78" stroke="${INK}" stroke-width="4"/>${[...Array(n)].map((_,j)=>egg(x-40+(j%3)*40,258+Math.floor(j/3)*26)).join('')}<text x="${x}" y="322" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}" font-family="Fredoka,sans-serif">${n} 顆</text></g>`});
+    if(phase==='split'){home.forEach((h,n)=>{if(h<0){const x=90+(n*97)%740,y=60+((n*53)%120);s+=`<g data-e="${n}" style="cursor:pointer" transform="translate(${x} ${y})"><ellipse rx="14" ry="17" fill="#F2EBDD" stroke="${INK}" stroke-width="3"/>${sel===n?`<circle r="24" fill="none" stroke="#E8E19E" stroke-width="5"/>`:''}</g>`}})}
+    q('#tnS').innerHTML=s;
+    q('#tnK').innerHTML=phase==='count'?[1,2,3,4,5,6,7,8,9,0].map(d=>`<button class="tool" data-d="${d}" style="min-width:56px;min-height:56px;font-size:24px;font-family:Fredoka,sans-serif">${d}</button>`).join('')+`<button class="btn c" id="tnOk" style="min-width:130px">答案</button>`:''};
+  let ans='';
+  q('#tnS').onclick=e=>{const g=e.target.closest('[data-e],[data-n]');
+    if(phase!=='split')return;
+    if(g&&g.dataset.e!=null){sel=+g.dataset.e;sPop();draw();return}
+    if(g&&g.dataset.n!=null){if(sel===null){api.say('先點一顆龜蛋。');return}
+      const cnt=home.filter(h=>+h===+g.dataset.n).length;
+      if(cnt>=4){api.no('這一窩滿了，每窩要一樣多！');return}
+      home[sel]=+g.dataset.n;sel=null;sPop();draw();
+      if(home.every(h=>h>=0)){sGood();phase='count';q('#tnQ').innerHTML='分好了！每窩 3 顆。第 2 題：<b>3 窩 × 每窩 3 顆 ＝ 一共幾顆蛋？</b>（用下面的數字鍵）';draw()}}};
+  q('#tnK').onclick=e=>{const d=e.target.closest('[data-d]');if(d){ans+=d.dataset.d;if(ans.length>2)ans=ans.slice(-2);q('#tnQ').innerHTML=`3 窩 × 每窩 3 顆 ＝ 一共幾顆蛋？<br><b style="font-size:34px;font-family:var(--f-en)">${ans||'？'}</b>`;return}
+    if(e.target.closest('#tnOk')){if(+ans===9){sWin();api.ok(okMsg,3000)}else{miss++;sBad();api.no(miss>=2?'提示：3＋3＋3 加起來是多少？':'再算一次：把三窩的蛋加起來。')}}};
+  q('#tnQ').innerHTML='第 1 題：海龜媽媽的 <b>9 顆蛋</b>要分到 3 個窩，點蛋、再點窩，讓每窩一樣多！';draw();
+  api.solve(()=>{if(phase==='split'){home.forEach((h,n)=>{if(h<0){sel=n;fire(q(`#tnS [data-n="${n%3}"]`))}});phase='count';draw()}
+    ans='9';fire(q('#tnOk'))});
+},920)}
+
+/* ---------- 紫光追逐：點真的發光腳印追怪盜X（章末動作關） ---------- */
+function uvChase(title){return g2(title,'gasp',`<p class="lead">白煙裡有好多腳印！只有<b style="color:#7FB98A">發亮的新鮮腳印</b>才是怪盜X 的——快點！灰灰的舊腳印是騙人的，別點！</p>
+  <svg id="ucS" viewBox="0 0 900 430" style="width:100%;max-height:330px;border:4px solid ${INK};border-radius:16px;display:block;background:#232A45"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="ucN"></span></div>`,api=>{
+  const {q}=api;let feet=[],prog=0,raf,last=performance.now(),next=0;
+  const foot=(x,y,real)=>`<g data-f="${real?1:0}" style="cursor:pointer" transform="translate(${x} ${y})"><ellipse rx="13" ry="19" fill="${real?'#B8F59A':'#6E6A80'}" opacity="${real?'.95':'.6'}" stroke="${real?'#50A260':'#3E3A50'}" stroke-width="3"/>${real?`<ellipse rx="13" ry="19" fill="none" stroke="#B8F59A" stroke-width="6" opacity=".3"/>`:''}</g>`;
+  const loop=now=>{if(api.over())return;const dt=Math.min(50,now-last);last=now;next-=dt;
+    if(next<=0){feet.push({x:880,y:80+Math.random()*280,real:Math.random()<.55,t:now});next=750}
+    feet=feet.filter(f=>now-f.t<5200);
+    q('#ucS').innerHTML=`<circle cx="120" cy="60" r="3" fill="#F7F0DE"/><circle cx="420" cy="40" r="2.5" fill="#F7F0DE"/><circle cx="700" cy="80" r="3" fill="#F7F0DE"/>
+     <g transform="translate(810 210) scale(.9)">${critter(Object.assign({},X2_LOOK,{mood:'grin'}))}</g>
+     <rect y="380" width="900" height="50" fill="#2F3858"/>${feet.map(f=>foot(f.x,f.y,f.real)).join('')}`;
+    q('#ucN').textContent=`追捕進度：${Math.floor(prog)}%`;
+    if(prog>=100){api.ok('追上了！怪盜X 的法術全破功！',2000);return}
+    raf=requestAnimationFrame(loop);T2.push(raf)};
+  q('#ucS').onclick=e=>{const g=e.target.closest('[data-f]');if(!g)return;
+    if(g.dataset.f==='1'){prog=Math.min(100,prog+12);sGood();tone([660,880],.07)}
+    else{prog=Math.max(0,prog-4);sBad();api.say('那是舊腳印！找「發亮」的！')}}; 
+  raf=requestAnimationFrame(loop);T2.push(raf);
+  api.solve(()=>{prog=100});
 },960)}
