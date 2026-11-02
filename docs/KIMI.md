@@ -94,3 +94,4 @@ python3 tests/autoplay.py             # 第一案也要跑一次，確認沒弄�
 - 不要改已完成章節的關卡 id（小朋友的存檔記得這些 id）。
 - 不要用漸層色、不要用其他作品的角色。
 - 第二套題目（`ALTS2`）等五章都完成後再做；格式見 DESIGN.md 第 4 節。
+- 動畫（requestAnimationFrame／setInterval）裡要畫多叔圖片時，一律用 `paintSVG()`（在 `js/minigames.js`），不要每格 innerHTML 重建 `<image>`，否則 iPad 上多叔會看不到。

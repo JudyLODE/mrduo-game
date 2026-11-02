@@ -177,6 +177,14 @@ function leafSvg(){const lf=(x,y,r)=>`<ellipse cx="${x}" cy="${y}" rx="40" ry="1
 
 /* ================= puzzle runners ================= */
 function dots(n){return `<div class="locks" id="pk">${Array.from({length:n},()=>'<i>？</i>').join('')}</div>`}
+/* 會一直重畫的動畫畫面：背景用 innerHTML 重畫，但多叔的圖片元素保留不重建。
+   （iPad Safari 每一格重建 <image> 會來不及載入，圖片就消失了。） */
+function paintSVG(svg,body,imgs){let d=svg.querySelector(':scope>g.dyn');if(!d){svg.innerHTML='<g class="dyn"></g>';d=svg.firstChild}
+  d.innerHTML=body;
+  (imgs||[]).forEach((o,k)=>{let el=svg.querySelector(`:scope>g[data-sp="${k}"]`);const NS='http://www.w3.org/2000/svg';
+    if(!el){el=document.createElementNS(NS,'g');el.setAttribute('data-sp',k);el.appendChild(document.createElementNS(NS,'image'));svg.appendChild(el)}
+    const im=el.firstChild;if(im.getAttribute('href')!==o.href)im.setAttribute('href',o.href);
+    ['x','y','width','height'].forEach(a=>im.setAttribute(a,o[a]));el.setAttribute('transform',o.t||'');el.setAttribute('opacity',o.op==null?1:o.op)})}
 function tick(b,i){const k=b.querySelector('#pk');if(k&&k.children[i]){k.children[i].className='on';k.children[i].textContent='✓'}}
 function quiz(title,qs,o={}){return new Promise(res=>{let i=0;
   modal(`<div class="card" data-duo="${o.duo||'think'}"><div class="row" style="justify-content:space-between"><h3>${title}</h3>${dots(qs.length)}</div><div id="qb"></div></div>`,b=>{const q=s=>b.querySelector(s);
@@ -430,7 +438,7 @@ function mazeChase(){return new Promise(res=>{const R=MAZE.length,C=MAZE[0].leng
     function draw(){let s='';for(let r=0;r<R;r++)for(let c=0;c<C;c++){const w=MAZE[r][c]==='#';s+=`<rect x="${c*100}" y="${r*100}" width="100" height="100" fill="${w?'#8E7558':'#F5ECD6'}" stroke="#E2D2AE" stroke-width="2" data-c="${c},${r}"/>`;if(w)s+=`<path d="M${c*100} ${r*100+33}h100M${c*100} ${r*100+66}h100" stroke="#7A6248" stroke-width="3"/>`}
       coins.forEach(k=>{const [c,r]=k.split(',').map(Number);s+=`<g transform="translate(${c*100+50} ${r*100+50})"><circle r="22" fill="#E5C35A" stroke="#3B3141" stroke-width="4"/><circle cx="-4" cy="-4" r="8" fill="#fff" stroke="#3B3141" stroke-width="3"/><path d="M3 3 l9 9" stroke="#3B3141" stroke-width="5" stroke-linecap="round"/></g>`});
       s+=`<g transform="translate(${8*100+50} ${5*100+96}) scale(.42)">${critter(X_LOOK)}</g>`;
-      s+=`<image href="${COAT.bust_coat.b}" x="${pos[0]*100+8}" y="${pos[1]*100+4}" width="84" height="94"/>`;q('#mzS').innerHTML=s}
+      paintSVG(q('#mzS'),s,[{href:COAT.bust_coat.b,x:pos[0]*100+8,y:pos[1]*100+4,width:84,height:94}])}
     function move(dx,dy){const nx=pos[0]+dx,ny=pos[1]+dy;if(nx<0||ny<0||nx>=C||ny>=R||MAZE[ny][nx]==='#'){tone([200],.05,'square',.05);return}
       pos=[nx,ny];tone([600],.04,'sine',.08);const k=nx+','+ny;if(coins.has(k)){coins.delete(k);G.mz=(G.mz||0)+1;tone([880,1175],.08)}
       draw();if(MAZE[ny][nx]==='X'){clearInterval(timer);sWin();q('#mzF').className='fb ok';q('#mzF').textContent='追上了！';lockFor(()=>{closeModal();res()},1300)}}
@@ -452,8 +460,7 @@ function tailGame(){return new Promise(res=>{let prog=0,look=0,warn=false,hold=f
       s+=`<g transform="translate(${xx} 395) scale(${look?-1:1} 1) scale(.95)">${critter(Object.assign({},X_LOOK,{mask:1}))}</g>`;
       if(warn&&!look)s+=`<g transform="translate(${xx} 120)"><circle r="34" fill="#F4D774" stroke="#3B3141" stroke-width="5"/><text y="14" text-anchor="middle" font-size="44" font-weight="900" fill="#3B3141">？</text></g>`;
       if(look)s+=`<g transform="translate(${xx} 120)"><circle r="34" fill="#C86062" stroke="#3B3141" stroke-width="5"/><text y="14" text-anchor="middle" font-size="44" font-weight="900" fill="#fff">！</text></g>`;
-      s+=`<image href="${COAT.coat_pocket.b}" x="${dx-60}" y="${395-210}" width="${210*COAT.coat_pocket.r}" height="210"/>`;
-      q('#tlS').innerHTML=s;q('#tlP').textContent=Math.floor(prog)+'%'}
+      paintSVG(q('#tlS'),s,[{href:COAT.coat_pocket.b,x:dx-60,y:395-210,width:210*COAT.coat_pocket.r,height:210}]);q('#tlP').textContent=Math.floor(prog)+'%'}
     let nextTurn=performance.now()+2200+Math.random()*1800,phase=0;
     const tick=()=>{const now=performance.now();
       if(phase===0&&now>nextTurn){phase=1;warn=true;nextTurn=now+(caught>=3?1400:800)}

@@ -9,7 +9,7 @@ const CASES={
   1:{key:'duoshu-case1-v3',title:'第一案',name:'消失的台灣三寶',tabs:['','台北101','日月潭','安平古堡'],short:['','101','日月潭','安平'],
      chn:['序章','第一章','第二章','第三章','最終章','結局'],feats:()=>FEATS,route:['t101','sml','anping'],badges:9,quests:2,inv:[1,3],last:4},
   2:{key:'duoshu-case2-v1',title:'第二案',name:'怪盜X的魔術環島',tabs:['','野柳','九份','太魯閣','鹿野高台','墾丁'],short:['','野柳','九份','太魯閣','鹿野','墾丁'],
-     chn:['序章','第一章','第二章','第三章','第四章','最終章','結局'],feats:()=>FEATS2,route:['yeliu','jiufen','taroko','luye','kenting'],badges:15,quests:5,inv:[1,5],last:5,wip:'製作中：目前可以玩序章和第一章「野柳」'},
+     chn:['序章','第一章','第二章','第三章','第四章','最終章','結局'],feats:()=>FEATS2,route:['yeliu','jiufen','taroko','luye','kenting'],badges:15,quests:5,inv:[1,5],last:5},
   3:{soon:1,title:'第三案',name:'海的那一邊（離島篇）',teaser:'怪盜X丟下的魔術帽裡寫著：「下次，我要去海的那一邊……澎湖、綠島、蘭嶼，等著我吧！」'}
 };
 let CUR=1;const CASE=()=>CASES[CUR];

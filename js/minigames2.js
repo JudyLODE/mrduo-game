@@ -269,9 +269,8 @@ function waveRun(title,need=8){return g2(title,'run',`<p class="lead">怪盜X沿
       const dist=Math.max(0,need-passed);
       let s=`<rect width="1000" height="380" fill="#CFE3EC"/><rect y="150" width="1000" height="90" fill="#7FB3CC"/><rect y="240" width="1000" height="140" fill="#D9C7A3"/>`;
       waves.forEach(w=>s+=`<path d="M${w.x-60} 290 Q${w.x-30} 200 ${w.x} 230 Q${w.x+20} 180 ${w.x+60} 290Z" fill="#5B9BC2" stroke="${INK}" stroke-width="4"/><path d="M${w.x-20} 225 q15 -14 30 -4" stroke="#fff" stroke-width="5" fill="none"/>`);
-      s+=`<image href="${COAT.coat_pocket.b}" x="${200-66*COAT.coat_pocket.r}" y="${290-140-y}" width="${140*COAT.coat_pocket.r}" height="140" opacity="${inv>0&&Math.floor(now/80)%2?.4:1}"/>`;
       s+=`<g transform="translate(${720+dist*25} 300) scale(.5)">${critter(X2_LOOK)}</g>`;
-      q('#wrS').innerHTML=s;q('#wrN').textContent=`跳過的浪：${passed}/${need}`;
+      paintSVG(q('#wrS'),s,[{href:COAT.coat_pocket.b,x:200-66*COAT.coat_pocket.r,y:290-140-y,width:140*COAT.coat_pocket.r,height:140,op:inv>0&&Math.floor(now/80)%2?.4:1}]);q('#wrN').textContent=`跳過的浪：${passed}/${need}`;
       if(passed>=need){api.ok('追上了！');return}
       raf=requestAnimationFrame(loop);T2.push(raf)};
     raf=requestAnimationFrame(loop);T2.push(raf);
@@ -702,8 +701,7 @@ function bridgeBal(title){return g2(title,'run',`<p class="lead">吊橋搖搖晃
     s+=`<path d="M60 236 Q450 174 840 236" stroke="#A57E5E" stroke-width="15" fill="none"/><path d="M60 210 Q450 148 840 210" stroke="#B5432F" stroke-width="6" fill="none"/>`;
     s+=`${[150,270,390,510,630,750].map(x=>`<line x1="${x}" y1="${deckY(x)}" x2="${x}" y2="${deckY(x)-26}" stroke="#8C6A4E" stroke-width="4"/>`).join('')}`;
     s+=`<path d="M770 60 l34 9 l-34 9z" fill="#C86062" opacity="${.35+Math.abs(tilt)/70}"/><text x="787" y="94" text-anchor="middle" font-size="16" font-weight="900" fill="${INK}">風</text>`;
-    s+=`<g transform="translate(${dx} ${deckY(dx)-4}) rotate(${tilt/3})"><image href="${COAT.coat_pocket.b}" x="${-62*COAT.coat_pocket.r}" y="-168" width="${150*COAT.coat_pocket.r}" height="168"/></g>`;
-    q('#bbS').innerHTML=s;q('#bbN').textContent=`過橋進度：${Math.floor(prog)}%`;
+    paintSVG(q('#bbS'),s,[{href:COAT.coat_pocket.b,x:-62*COAT.coat_pocket.r,y:-168,width:150*COAT.coat_pocket.r,height:168,t:`translate(${dx} ${deckY(dx)-4}) rotate(${tilt/3})`}]);q('#bbN').textContent=`過橋進度：${Math.floor(prog)}%`;
     if(prog>=100){api.ok('走到對岸了！平衡感一流！',2000);return}
     raf=requestAnimationFrame(loop);T2.push(raf)};
   raf=requestAnimationFrame(loop);T2.push(raf);
