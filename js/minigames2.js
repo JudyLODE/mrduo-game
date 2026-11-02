@@ -554,7 +554,7 @@ function digDiv(title,lead,okMsg){const N=12,COL=['#C86062','#D4BB49','#5B84AB',
 function logicGrid(title,lead,people,trails,clues,sol,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
   <div class="mgrid" style="align-items:start"><div><div class="story"><b>線索：</b><ul style="margin:6px 0 0;padding-left:22px;line-height:1.9;font-size:18px">${clues.map(c=>`<li>${c}</li>`).join('')}</ul></div>
   <div class="story" style="margin-top:10px;background:#FFF6D8">每個人走一條不同的步道。點格子可以切換：？→ ✓ → ✗。</div></div>
-  <div><div class="lg" id="lgG"><div class="lgh"></div>${trails.map(t=>`<div class="lgh">${t}</div>`).join('')}${people.map((p,pi)=>`<div class="lgh">${p}</div>${trails.map((_,ti)=>`<button class="lgc" data-p="${pi}" data-t="${ti}">？</button>`).join('')}`).join('')}</div>
+  <div><div class="lg" id="lgG" style="grid-template-columns:auto repeat(${trails.length},1fr)"><div class="lgh"></div>${trails.map(t=>`<div class="lgh">${t}</div>`).join('')}${people.map((p,pi)=>`<div class="lgh">${p}</div>${trails.map((_,ti)=>`<button class="lgc" data-p="${pi}" data-t="${ti}">？</button>`).join('')}`).join('')}</div>
   <div class="row" style="justify-content:center;margin-top:10px"><button class="btn c" id="lgOk">推理好了</button></div></div></div>`,api=>{
   const {q,qa}=api;const mark={};let miss=0;
   q('#lgG').onclick=e=>{const b=e.target.closest('.lgc');if(!b)return;const k=b.dataset.p+'-'+b.dataset.t;
@@ -639,7 +639,7 @@ function idiomChain(title,lead,rounds,okMsg){return g2(title,'think',`<p class="
   <div class="story" style="background:#FFF6D8" id="icQ"></div>
   <div class="row" id="icO" style="justify-content:center;margin-top:4px"></div>`,api=>{
   const {q}=api;let i=0,miss=0,solving=false;
-  const show=()=>{const r=rounds[i];q('#icC').innerHTML=`「${r.cur}」`;
+  const show=()=>{if(i>=rounds.length)return;const r=rounds[i];q('#icC').innerHTML=`「${r.cur}」`;
     q('#icQ').innerHTML=`第 ${i+1} 棒：下一個成語要用 <b>「${r.cur[r.cur.length-1]}」</b> 開頭！`;
     q('#icO').innerHTML=shuffle(r.opts.map(o=>({o,ok:o===r.ans}))).map(x=>`<button class="btn w" data-ok="${x.ok?1:0}" style="min-width:180px;font-family:var(--f-hand);font-size:27px">${x.o}</button>`).join('')};
   q('#icO').onclick=e=>{const b=e.target.closest('[data-ok]');if(!b)return;
@@ -733,3 +733,247 @@ function rockBorn(title,lead,rocks,stories,okMsg){return g2(title,'think',`<p cl
 function numLineSolo(title,lead,o){return g2(title,'think',`<p class="lead">${lead}</p>
   <div class="labstep" id="lbS"></div><svg id="lbV" viewBox="0 0 900 380" style="width:100%;max-height:300px;display:block;touch-action:none"></svg>
   <div class="labtray" id="lbT" style="justify-content:center"></div><div class="row" id="lbR" style="justify-content:center"></div>`,api=>{numberLine(api,o)},940)}
+
+/* ================= 第四章 鹿野高台 的新玩法（因地制宜：物理／地理／文化／音樂／歷史／生物） ================= */
+
+/* ---------- 熱空氣上升：預測→加熱→看球升起（物理，章核心） ---------- */
+function heatRise(title,lead,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <svg id="hrS" viewBox="0 0 900 400" style="width:100%;max-height:330px;border:4px solid ${INK};border-radius:16px;display:block;background:#CFE3EC"></svg>
+  <div class="row" id="hrO" style="justify-content:center;margin-top:8px"></div>`,api=>{
+  const {q}=api;let phase='predict',hot=0,raf,heat=false,last=performance.now();
+  const bag=(x,y,c1,c2)=>`<g transform="translate(${x} ${y})"><path d="M0 -150 C-70 -150 -70 -20 -20 30 H20 C70 -10 70 -150 0 -150Z" fill="${c1}" stroke="${INK}" stroke-width="6"/><path d="M0 -150 C-26 -150 -26 -10 -8 30 H8 C26 -10 26 -150 0 -150Z" fill="${c2}"/><path d="M-18 30 L-12 58 M18 30 L12 58" stroke="${INK}" stroke-width="4"/><rect x="-20" y="58" width="40" height="28" rx="6" fill="#A57E5E" stroke="${INK}" stroke-width="4"/></g>`;
+  const draw=()=>{const yA=150-hot*150,yB=150;let s=`<rect width="900" height="400" fill="#CFE3EC"/><rect y="340" width="900" height="60" fill="#9DBE7A"/>`;
+    s+=`<text x="300" y="380" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">① 這顆用火加熱</text><text x="600" y="380" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">② 這顆不加熱</text>`;
+    s+=`<line x1="300" y1="10" x2="300" y2="${yA-150}" stroke="${INK}" stroke-width="3"/><line x1="600" y1="10" x2="600" y2="${yB-150}" stroke="${INK}" stroke-width="3"/>`;
+    if(heat&&hot<1){s+=`<g transform="translate(300 ${yA+118})"><path class="bob" d="M0 0 q-14 -18 0 -34 q4 -10 0 -18 q18 14 6 34 q8 6 2 18z" fill="#D29841" stroke="${INK}" stroke-width="3"/><path d="M0 -6 q-6 -10 0 -20 q2 -6 0 -10 q8 8 3 20z" fill="#E5C35A"/></g>`}
+    s+=bag(300,yA,'#C86062','#D4BB49')+bag(600,yB,'#5B84AB','#F7F0E1');
+    if(hot>=1)s+=`<text x="300" y="${yA-170}" text-anchor="middle" font-size="26" font-weight="900" fill="#C86062">飛起來了！</text>`;
+    q('#hrS').innerHTML=s;
+    if(phase==='heat')q('#hrO').innerHTML=`<span class="pill">加熱中…… ${Math.floor(hot*100)}%</span>`};
+  const ask=()=>{q('#hrO').innerHTML=`哪一顆球會自己升起來？　<button class="btn w" data-p="0">① 加熱的那一顆</button><button class="btn w" data-p="1">② 不加熱的那一顆</button><button class="btn w" data-p="2">兩顆都不動</button>`;
+    q('#hrO').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;
+      if(+b.dataset.p===0){sGood();q('#hrO').onclick=null;lockFor(go,900)}
+      else{sBad();shake(b);api.no('再想想看：哪一顆球裡的空氣會變熱？')}}};
+  const go=()=>{phase='heat';api.say('按住「🔥 加熱」，讓①號球的空氣變熱！');
+    q('#hrO').innerHTML=`<button class="btn c" id="hrF" style="min-width:220px;min-height:70px;font-size:24px;touch-action:none">🔥 按住加熱</button>`;
+    const f=q('#hrF');f.addEventListener('pointerdown',e=>{e.preventDefault();heat=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>f.addEventListener(ev,()=>heat=false))};
+  const loop=now=>{if(api.over())return;const dt=Math.min(50,now-last);last=now;
+    if(heat&&hot<1){hot=Math.min(1,hot+dt*.00055);draw();if(hot>=1){heat=false;finish()}}
+    raf=requestAnimationFrame(loop);T2.push(raf)};
+  const finish=()=>{draw();api.ok(okMsg,3200)};
+  draw();ask();raf=requestAnimationFrame(loop);T2.push(raf);
+  api.solve(()=>{heat=false;hot=1;finish()});
+},940)}
+
+/* ---------- 方位轉盤：把箭頭轉向風來的方向（地理） ---------- */
+function windCompass(title,lead,rounds,okMsg){const D8=['北','東北','東','東南','南','西南','西','西北'];
+ return g2(title,'point',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:center"><svg id="wcS" viewBox="-160 -160 320 320" style="width:100%;max-height:320px"></svg>
+  <div><div class="story" id="wcQ"></div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn w" id="wcL">⟲ 左轉</button><button class="btn w" id="wcR">右轉 ⟳</button></div>
+  <div class="row" style="justify-content:center;margin-top:8px"><button class="btn c" id="wcOk">轉好了</button></div></div></div>`,api=>{
+  const {q}=api;let i=0,r=0,miss=0;
+  const draw=()=>{if(i>=rounds.length)return;let s=`<circle r="140" fill="#FFFDF6" stroke="${INK}" stroke-width="7"/><circle r="118" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="4 8"/>`;
+    for(let k=0;k<8;k++){const a=deg(k*45-90),x=Math.cos(a),y=Math.sin(a);
+      s+=`<line x1="${x*118}" y1="${y*118}" x2="${x*132}" y2="${y*132}" stroke="${INK}" stroke-width="${k%2?3:5}"/>`;
+      s+=`<text x="${x*92}" y="${y*92+10}" text-anchor="middle" font-size="26" font-weight="900" fill="${k%2?'#8A8F98':INK}">${D8[k]}</text>`}
+    const a=deg(r*45-90);s+=`<g transform="rotate(${r*45})"><path d="M0 -108 L16 0 L-16 0Z" fill="#C86062" stroke="${INK}" stroke-width="4"/><path d="M0 34 L12 0 L-12 0Z" fill="#92C3DB" stroke="${INK}" stroke-width="3"/></g>`;
+    s+=`<circle r="10" fill="${INK}"/>`;q('#wcS').innerHTML=s};
+  const ask=()=>{if(i>=rounds.length)return;q('#wcQ').innerHTML=`第 ${i+1} 題：${rounds[i].q}<small>用「左轉／右轉」把紅色箭頭指向風來的方向。</small>`};
+  q('#wcL').onclick=()=>{r=(r+7)%8;sPop();draw()};q('#wcR').onclick=()=>{r=(r+1)%8;sPop();draw()};
+  q('#wcOk').onclick=()=>{if(i>=rounds.length)return;if(r===rounds[i].ans){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,2400)}else{api.say('對了！風就是從'+D8[rounds[i-1].ans]+'方吹來的。','ok');lockFor(ask,1100)}}
+    else{miss++;sBad();shake(q('#wcOk'));api.no(miss>=2?`提示：把箭頭轉到「${D8[rounds[i].ans]}」字的那個方向。`:'再看一次題目，風從哪裡吹來？')}};
+  draw();ask();
+  api.solve(()=>{for(const x of rounds.slice(i)){r=x.ans;draw();fire(q('#wcOk'))}});
+},880)}
+
+/* ---------- 豐年祭盛裝：幫阿美族姐姐穿上祭典服飾（文化） ---------- */
+function dressUp(title,lead,cats,okMsg){const FIG=(sel)=>{const P=k=>cats[k].opts[sel[k]].art;
+  return `<svg viewBox="0 0 300 430" style="max-height:330px;display:block;margin:0 auto">
+   <ellipse cx="150" cy="418" rx="90" ry="10" fill="#D9C7A3"/>
+   <circle cx="150" cy="96" r="46" fill="#F2C9A0" stroke="${INK}" stroke-width="4"/>
+   <path d="M104 88 q10 -52 46 -52 q36 0 46 52 q-14 -30 -46 -30 q-32 0 -46 30z" fill="#3A332E"/>
+   <circle cx="133" cy="98" r="5" fill="${INK}"/><circle cx="167" cy="98" r="5" fill="${INK}"/>
+   <path d="M136 118 q14 10 28 0" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>
+   <path d="M112 150 q38 -20 76 0 l6 46 h-88z" fill="#E8B48C" stroke="${INK}" stroke-width="4"/>
+   ${P(0)}${P(1)}${P(2)}${P(3)}
+   <path d="M112 236 l-14 120 M188 236 l14 120" stroke="#F2C9A0" stroke-width="16" stroke-linecap="round"/>
+   <path d="M98 356 l-6 44 M202 356 l6 44" stroke="${INK}" stroke-width="4"/></svg>`};
+ return g2(title,'welcome',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:center"><div id="duF">${FIG(cats.map(()=>0))}</div>
+  <div><div class="story">今天是豐年祭！阿美族的盛裝有紅、黑、白三色，還有漂亮的刺繡和羽飾。</div>
+  <div id="duS" style="margin-top:10px"></div>
+  <div class="row" style="justify-content:center;margin-top:10px"><button class="btn c" id="duOk">穿好囉！</button></div></div></div>`,api=>{
+  const {q}=api;const sel=cats.map(()=>0);let miss=0;
+  const draw=()=>{q('#duF').innerHTML=FIG(sel);
+    q('#duS').innerHTML=cats.map((c,k)=>`<button class="ducat" data-k="${k}"><small>${c.slot}</small><b>${c.opts[sel[k]].n}</b><span>換</span></button>`).join('')};
+  q('#duS').onclick=e=>{const b=e.target.closest('.ducat');if(!b)return;const k=+b.dataset.k;sel[k]=(sel[k]+1)%cats[k].opts.length;sPop();draw()};
+  q('#duOk').onclick=()=>{const bad=cats.findIndex((c,k)=>!c.opts[sel[k]].ok);
+    if(bad<0){sWin();api.ok(okMsg,3400)}
+    else{miss++;sBad();shake(q(`#duS [data-k="${bad}"]`));api.no(miss>=2?`提示：${cats[bad].hint}`:'有地方不像豐年祭的盛裝，再換換看！')}};
+  draw();
+  api.solve(()=>{cats.forEach((c,k)=>{sel[k]=c.opts.findIndex(o=>o.ok);draw()});fire(q('#duOk'))});
+},860)}
+
+/* ---------- 八部合音：從最低音開始，一個一個疊出合唱（音樂） ---------- */
+function harmonyStack(title,lead,notes,okMsg){const P=[262,294,330,349,392,440,494,523];
+ return g2(title,'welcome',`<p class="lead">${lead}</p>
+  <svg id="hyS" viewBox="0 0 900 330" style="width:100%;max-height:300px;border:4px solid ${INK};border-radius:16px;display:block;background:#EAF3E2"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="hyN"></span></div>`,api=>{
+  const {q}=api;const order=shuffle(Array.from({length:notes},(_,k)=>k));let step=0,miss=0;
+  const draw=()=>{q('#hyS').innerHTML=`<rect y="270" width="900" height="60" fill="#9DBE7A"/>`+
+    order.map((ni,k)=>{const x=80+k*105,done=ni<step,cur=ni===step;
+      return `<g data-k="${k}" style="cursor:pointer"><g transform="translate(${x} 270) scale(.56)"><g class="${done?'':'breathe'}">${critter({k:'bear',m:done?'grin':'smile'})}</g></g>
+      ${done?`<rect x="${x-38}" y="${40+(7-ni)*10}" width="76" height="${230-(40+(7-ni)*10)}" fill="#C86062" opacity=".28" rx="8"/>`:''}
+      <text x="${x}" y="318" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">${'一二三四五六七八'[ni]}部</text>
+      ${cur?`<g transform="translate(${x} 60)"><circle r="22" fill="#D4BB49" stroke="${INK}" stroke-width="4"/><text y="9" text-anchor="middle" font-size="26" font-weight="900" fill="${INK}">♪</text></g>`:''}</g>`}).join('');
+    q('#hyN').textContent=`已加入：${step}/8 個聲部`};
+  q('#hyS').onclick=e=>{const g=e.target.closest('[data-k]');if(!g)return;const ni=order[+g.dataset.k];
+    if(ni<step)return;
+    if(ni===step){step++;sGood();tone([P[ni]],.3,'sine',.16);draw();
+      if(step>=8){tone(P,.4,'sine',.12);api.ok(okMsg,3600)}}
+    else{miss++;sBad();shake(g);api.no(miss>=2?'提示：先找音最低的族員，從低音一個一個往上疊！':'聽聽看，哪一個聲音最低？從最低的開始！')}};draw();
+  api.solve(()=>{for(let s=step;s<8;s++){const k=order.indexOf(s);fire(q(`#hyS [data-k="${k}"]`))}});
+},900)}
+
+/* ---------- 拼板舟：把拼板一片片拼回去（工藝文化） ---------- */
+function boatBuild(title,lead,pieces,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="bb2S" viewBox="0 0 900 400" style="width:100%;max-height:340px;border:4px solid ${INK};border-radius:16px;display:block;background:#BFD9E6"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="pill" id="bb2N"></span></div>`,api=>{
+  const {q}=api;const done=new Set();let sel=null,miss=0;
+  const hull=i=>`<g transform="translate(150 ${96+i*38})">${[0,1,2,3,4,5].map(k=>`<rect x="${k*100}" y="0" width="100" height="38" fill="${pieces[i].col}" stroke="${INK}" stroke-width="3"/>`).join('')}</g>`;
+  const draw=()=>{let s=`<rect y="330" width="900" height="70" fill="#D9C7A3"/><rect y="300" width="900" height="34" fill="#7FB3CC"/>`;
+    if(done.size===pieces.length){s+=`<path d="M120 ${96+0*38} q-56 -8 -66 -44 q40 6 66 30z" fill="#3A3A40"/><path d="M780 ${96+0*38} q56 -8 66 -44 q-40 6 -66 30z" fill="#3A3A40"/>`}
+    pieces.forEach((p,i)=>{if(done.has(i))s+=hull(i)});
+    pieces.forEach((p,i)=>{if(!done.has(i)){const t=p.home;
+      s+=`<g data-h="${i}" style="cursor:pointer" transform="translate(150 ${96+t*38})">${sel===i?`<rect x="-4" y="-4" width="608" height="46" fill="none" stroke="#E8E19E" stroke-width="6"/>`:''}<path d="M0 0 H600 V38 H0Z" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="8 8" opacity=".5"/></g>`}});
+    pieces.forEach((p,i)=>{if(!done.has(i)){const sx=p.sx,sy=p.sy;
+      s+=`<g data-p="${i}" style="cursor:pointer" transform="translate(${sx} ${sy})"><rect width="100" height="38" fill="${p.col}" stroke="${INK}" stroke-width="4"/><path d="M10 10 h80 M10 20 h80" stroke="#FFFFFF" stroke-width="3" opacity=".35"/></g>`}});
+    if(done.size===pieces.length)s+=`<g transform="translate(170 96)"><circle cx="0" cy="0" r="14" fill="#FFFFFF" stroke="${INK}" stroke-width="4"/><circle r="5" fill="${INK}"/></g>`;
+    q('#bb2S').innerHTML=s;q('#bb2N').textContent=`拼好的船板：${done.size}/${pieces.length}`};
+  q('#bb2S').onclick=e=>{const g=e.target.closest('[data-p],[data-h]');
+    if(g&&g.dataset.p!=null){sel=+g.dataset.p;sPop();draw();return}
+    if(g&&g.dataset.h!=null){if(sel===null){api.say('先點下面的一片船板。');return}
+      if(+g.dataset.h===pieces[sel].home){done.add(sel);tone([392+sel*40],.08);const tmp=sel;sel=null;sGood();draw();
+        if(done.size===pieces.length)api.ok(okMsg,3400)}
+      else{miss++;sBad();shake(q(`#bb2S [data-h="${g.dataset.h}"]`));api.no(miss>=2?'提示：看船板彎彎的弧度，从上到下排排看！':'這個位置不對，看弧度找找看！')}}};draw();
+  api.solve(()=>{pieces.forEach((p,i)=>{fire(q(`#bb2S [data-p="${i}"]`));fire(q(`#bb2S [data-h="${p.home}"]`))})});
+},900)}
+
+/* ---------- 圍田挑戰：拖出指定面積或周長的田（數學，高年級） ---------- */
+function fieldFence(title,lead,rounds,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <svg id="ffS" viewBox="0 0 720 400" style="width:100%;max-height:330px;border:4px solid ${INK};border-radius:16px;display:block;background:#C9E0A8;touch-action:none"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><span class="story" id="ffQ" style="flex:1;min-width:230px"></span><button class="btn c" id="ffOk">圍好了</button></div>`,api=>{
+  const {q}=api;const C=8,R=5,GW=80;let i=0,anchor=null,rect=null,miss=0;
+  const draw=()=>{let s='';for(let r2=0;r2<R;r2++)for(let c2=0;c2<C;c2++){const x=20+c2*GW,y=20+r2*GW;
+    s+=`<g data-c="${c2}" data-r="${r2}"><rect x="${x}" y="${y}" width="${GW}" height="${GW}" fill="#B9D68E" stroke="#A3C277" stroke-width="2"/>${(r2*3+c2*7)%5===0?`<path d="M${x+20} ${y+60} q10 -20 20 0" stroke="#8DB36E" stroke-width="3" fill="none"/>`:''}</g>`}
+    if(rect){const x=20+rect[0]*GW,y=20+rect[1]*GW,w=(rect[2]-rect[0]+1)*GW,h=(rect[3]-rect[1]+1)*GW;
+      s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#F2E9C6" stroke="#946F4B" stroke-width="10" rx="6"/>`}
+    q('#ffS').innerHTML=s};
+  const info=()=>{if(!rect)return'';const w=rect[2]-rect[0]+1,h=rect[3]-rect[1]+1;return `寬 ${w}、長 ${h}　面積 ${w*h}、周長 ${(w+h)*2}`};
+  const ask=()=>{if(i>=rounds.length)return;rect=null;q('#ffQ').innerHTML=rounds[i].q+`<br><small>在方格上<b>按住拖曳</b>出一個長方形。</small>`;draw()};
+  q('#ffS').addEventListener('pointerdown',e=>{const g=e.target.closest('[data-c]');if(!g)return;anchor=[+g.dataset.c,+g.dataset.r];rect=null});
+  q('#ffS').addEventListener('pointermove',e=>{if(!anchor)return;const g=e.target.closest('[data-c]');if(!g)return;
+    const c=+g.dataset.c,r=+g.dataset.r;rect=[Math.min(anchor[0],c),Math.min(anchor[1],r),Math.max(anchor[0],c),Math.max(anchor[1],r)];draw();
+    q('#ffQ').innerHTML=rounds[i].q+`<br><small>${info()}</small>`});
+  q('#ffS').addEventListener('pointerup',()=>anchor=null);
+  q('#ffOk').onclick=()=>{if(i>=rounds.length)return;if(!rect){api.say('先在方格上拖出一個長方形。');return}
+    const w=rect[2]-rect[0]+1,h=rect[3]-rect[1]+1,rr=rounds[i];
+    if(w===rr.w&&h===rr.h){sGood();i++;
+      if(i>=rounds.length){api.ok(okMsg,2600)}else{api.say(`對了！${w}×${h}＝${w*h}，周長 ${(w+h)*2}。`,'ok');lockFor(ask,1300)}}
+    else{miss++;sBad();api.no(miss>=2?`提示：${rr.hint}`:`這一塊面積 ${w*h}、周長 ${(w+h)*2}，跟題目不一樣。`)}};
+  ask();
+  api.solve(()=>{for(const r of rounds.slice(i)){rect=[0,0,r.w-1,r.h-1];draw();fire(q('#ffOk'))}});
+},920)}
+
+/* ---------- 地層挖掘：越深越古老，把文物放對地層（歷史） ---------- */
+function digLayers(title,lead,layers,items,okMsg){return g2(title,'hmm',`<p class="lead">${lead}</p>
+  <div class="mgrid" style="align-items:center"><svg id="dlS" viewBox="0 0 560 400" style="width:100%;max-height:340px;border:4px solid ${INK};border-radius:16px;display:block"></svg>
+  <div><div class="story" id="dlQ">考古小隊發現了 ${items.length} 件東西！先點一件，再點你覺得它埋在那一層。<small>考古學家的祕訣：越深的地層，東西越古老。</small></div>
+  <div class="row" id="dlI" style="justify-content:center;margin-top:10px"></div></div></div>`,api=>{
+  const {q}=api;const put=items.map(()=>-1);let sel=null,miss=0;
+  const col=k=>['#C9A06E','#B08A5C','#96714C','#7E5D3F','#6B4E33'][k]||'#6B4E33';
+  const draw=()=>{let s='';layers.forEach((L,k)=>{const y=20+k*76;
+      s+=`<g data-l="${k}" style="cursor:pointer"><rect x="40" y="${y}" width="480" height="76" fill="${col(k)}" stroke="${INK}" stroke-width="4"/>${k?`<path d="M40 ${y} q60 10 120 0 t120 0 t120 0 t120 0" stroke="${shade(col(k),-20)}" stroke-width="4" fill="none"/>`:''}
+      <text x="270" y="${y+44}" text-anchor="middle" font-size="19" font-weight="900" fill="#FFFDF6">${L}</text>${items.map((it,n)=>put[n]===k?`<g transform="translate(${110+(n*97)%340} ${y+56}) scale(.8)">${it.art}</g>`:'').join('')}</g>`});
+    q('#dlS').innerHTML=s;
+    q('#dlI').innerHTML=items.map((it,n)=>put[n]>=0?'':`<button class="labitem${sel===n?' on':''}" data-n="${n}"><span style="font-size:26px">${it.e}</span><span>${it.n}</span></button>`).join('')};
+  q('#dlI').onclick=e=>{const b=e.target.closest('[data-n]');if(!b)return;sel=+b.dataset.n;sPop();draw()};
+  q('#dlS').onclick=e=>{const g=e.target.closest('[data-l]');if(!g)return;if(sel===null){api.say('先點右邊的一件文物。');return}
+    const k=+g.dataset.l,it=items[sel];
+    if(k===it.l){put[sel]=k;sel=null;sGood();tone([440,554],.08);draw();
+      if(put.every(v=>v>=0))api.ok(okMsg,3600)}
+    else{miss++;sBad();shake(g);api.no(miss>=2?`提示：「${it.n}」是${it.when}的東西——距今越久遠，埋得越深喔！`:'想一想它距今多久，越深越古老！')}};draw();
+  api.solve(()=>{items.forEach((it,n)=>{fire(q(`#dlI [data-n="${n}"]`));fire(q(`#dlS [data-l="${it.l}"]`))})});
+},920)}
+
+/* ---------- 縱谷山河拼圖：把山脈河海放回地圖（地理） ---------- */
+function mapBuild(title,lead,pieces,zones,marks,okMsg){return g2(title,'point',`<p class="lead">${lead}</p>
+  <svg id="mbS" viewBox="0 0 900 430" style="width:100%;max-height:340px;display:block"></svg>
+  <div class="row" style="justify-content:center;margin-top:6px"><span class="pill" id="mbN"></span></div>`,api=>{
+  const {q}=api;const done=new Set();let sel=null,miss=0;
+  const draw=()=>{let s=`<rect x="30" y="20" width="840" height="360" rx="16" fill="#EAF3E2" stroke="${INK}" stroke-width="5"/>`;
+    zones.forEach((z,k)=>{if(!done.has('z'+k))s+=`<g data-z="${k}" style="cursor:pointer"><rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" fill="#FFFFFF" fill-opacity=".6" stroke="${INK}" stroke-width="3" stroke-dasharray="10 8"/><text x="${z.x+z.w/2}" y="${z.y+z.h/2+8}" text-anchor="middle" font-size="20" font-weight="900" fill="#8A8F98">？</text>${sel!==null&&pieces[sel].zone===k?`<rect x="${z.x-3}" y="${z.y-3}" width="${z.w+6}" height="${z.h+6}" fill="none" stroke="#E8E19E" stroke-width="6"/>`:''}</g>`});
+    pieces.forEach((p,i)=>{if(done.has('p'+i)){if(p.zone!=null)s+=`<g transform="translate(${zones[p.zone].x} ${zones[p.zone].y})">${p.art}</g>`;else s+=`<g transform="translate(${p.mx} ${p.my})">${p.art}</g>`}});
+    marks.forEach((m,k)=>{if(!done.has('m'+k))s+=`<circle data-m="${k}" cx="${m.x}" cy="${m.y}" r="26" fill="#FFF6D8" stroke="${INK}" stroke-width="3" stroke-dasharray="6 5" style="cursor:pointer"/>`});
+    pieces.forEach((p,i)=>{if(!done.has('p'+i))s+=`<g data-p="${i}" style="cursor:pointer" transform="translate(${p.sx} ${p.sy})${sel===i?' scale(1.12)':''}">${p.art}</g>`});
+    q('#mbS').innerHTML=s;q('#mbN').textContent=`放好了：${done.size/2}/${pieces.length}`};
+  q('#mbS').onclick=e=>{const g=e.target.closest('[data-p],[data-z],[data-m]');
+    if(g&&g.dataset.p!=null){sel=+g.dataset.p;sPop();draw();return}
+    if(sel===null){api.say('先點下面散落的零件。');return}
+    const p=pieces[sel];
+    if(g&&g.dataset.z!=null){if(+g.dataset.z===p.zone){done.add('p'+sel);done.add('z'+p.zone);sel=null;sGood();draw();
+        if(done.size>=pieces.length*2)api.ok(okMsg,3200);return}}
+    else if(g&&g.dataset.m!=null&&p.mark!=null){if(+g.dataset.m===p.mark){done.add('p'+sel);done.add('m'+p.mark);sel=null;sGood();draw();
+        if(done.size>=pieces.length*2)api.ok(okMsg,3200);return}}
+    if(g){miss++;sBad();api.no(miss>=2?`提示：${p.hint}`:'位置不對，想想看台東的地理課！')}};draw();
+  api.solve(()=>{pieces.forEach((p,i)=>{fire(q(`#mbS [data-p="${i}"]`));fire(q(p.zone!=null?`#mbS [data-z="${p.zone}"]`:`#mbS [data-m="${p.mark}"]`))})});
+},900)}
+
+/* ---------- 釋迦等價秤重：左盤擺出和右盤一樣重（數學） ---------- */
+function marketScale(title,lead,rounds,okMsg){return g2(title,'think',`<p class="lead">${lead}</p>
+  <svg id="msS" viewBox="0 0 900 340" style="width:100%;max-height:290px;display:block"></svg>
+  <div class="row" id="msB" style="justify-content:center;margin-top:6px"></div>`,api=>{
+  const {q}=api;let i=0,miss=0;const left=[];
+  const fr=(x,s)=>`<g transform="translate(${x} 0) scale(${s})"><circle r="26" fill="#8DB36E" stroke="${INK}" stroke-width="4"/><path d="M-14 -6 q-6 -18 4 -22 q14 -4 20 8 q10 2 8 12 q-2 12 -16 12 q-20 0 -16 -10z" fill="#8DB36E" stroke="${INK}" stroke-width="3"/><path d="M6 -26 q8 -10 16 -8" stroke="${INK}" stroke-width="3" fill="none"/></g>`;
+  const wt=side=>side.reduce((a,b)=>a+(b?2:1),0);
+  const draw=()=>{if(i>=rounds.length)return;const lw=wt(left),rw=wt(rounds[i].right),tip=lw===rw?0:lw>rw?-1:1;
+    q('#msS').innerHTML=`<rect y="300" width="900" height="40" fill="#C9B085"/><g transform="rotate(${tip*5} 450 44)"><path d="M450 44 V300" stroke="${INK}" stroke-width="10"/><path d="M140 44 H760" stroke="${INK}" stroke-width="10"/>
+    ${[140,760].map((px,k)=>{const w2=k?rw:lw,down=k?(tip>0?18:0):(tip<0?18:0);return `<path d="M${px} 44 L${px-18} ${150+down} M${px} 44 L${px+18} ${150+down}" stroke="${INK}" stroke-width="4"/><g transform="translate(${px} ${168+down})"><path d="M-92 0 A92 34 0 0 0 92 0Z" fill="#8C6A4E" stroke="${INK}" stroke-width="5"/>${(k?rounds[i].right:left).map((b,n)=>`<g transform="translate(${(n%3-1)*46} ${-14-Math.floor(n/3)*34})">${fr(0,1)}${b?'':'<text y="7" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">小</text>'}</g>`).join('')}</g>`}).join('')}</g>
+    <text x="450" y="28" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">左盤 ${lw}　⚖️　右盤 ${rw}</text>`;
+    q('#msB').innerHTML=`<button class="btn w" data-a="1">＋大釋迦（2 斤）</button><button class="btn w" data-a="0">＋小釋迦（1 斤）</button><button class="tool" id="msU">拿下一顆</button><button class="btn c" id="msOk">秤看看</button>`};
+  q('#msB').onclick=e=>{const a=e.target.closest('[data-a]');if(a){left.push(+a.dataset.a);sPop();draw();return}
+    if(e.target.closest('#msU')){left.pop();draw();return}
+    if(e.target.closest('#msOk')){if(i>=rounds.length)return;const lw=wt(left),rw=wt(rounds[i].right);
+      if(lw===rw){sGood();i++;
+        if(i>=rounds.length){api.ok(okMsg,2800)}else{left.length=0;api.say('天平平衡了！一樣重！','ok');lockFor(draw,1200)}}
+      else{miss++;sBad();shake(q('#msS'));api.no(miss>=2?`提示：右盤是 ${rw} 斤，想想 2 的倍数：${rw} 可以怎麼湊？`:`左盤 ${lw} 斤、右盤 ${rw} 斤，還不一樣重。`)}}};draw();
+  api.solve(()=>{for(const r of rounds.slice(i)){left.length=0;r.right.forEach(b=>left.push(b));draw();fire(q('#msOk'))}});
+},900)}
+
+/* ---------- 熱氣球駕駛：控高度找順風層（章末動作關） ---------- */
+function balloonRide(title){return g2(title,'run',`<p class="lead">怪盜X 搭熱氣球逃走了！按住「🔥 加熱上升」、放開讓球慢慢下降。<b>中間的高度層</b>吹著往右邊的順風——找到它，追上怪盜X！</p>
+  <svg id="brS" viewBox="0 0 900 430" style="width:100%;max-height:330px;border:4px solid ${INK};border-radius:16px;display:block;background:#CFE3EC"></svg>
+  <div class="row" style="justify-content:center;margin-top:8px"><button class="btn c" id="brU" style="min-width:230px;min-height:66px;font-size:23px;touch-action:none">🔥 按住加熱上升</button><span class="pill" id="brN"></span></div>`,api=>{
+  const {q}=api;let bx=80,by=300,vy=0,hold=false,catchT=0,stumble=0,raf,last=performance.now();
+  const up=q('#brU');const on=e=>{e.preventDefault();hold=true},off=()=>hold=false;
+  up.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>up.addEventListener(ev,off));
+  const wind=y=>y<140?-(stumble>=2?.4:.8):y<280?.9:-(stumble>=2?.3:.5);
+  const loop=now=>{if(api.over())return;const dt=Math.min(50,now-last);last=now;
+    vy=hold?-1.5:.55;by=Math.max(70,Math.min(360,by+vy*dt*.06));bx=Math.max(30,Math.min(830,bx+wind(by)*dt*.06));
+    if((by<=70&&vy<0)||(by>=360&&vy>0)){by=Math.max(70,Math.min(360,by))}
+    const inWind=by>=140&&by<280,nearX=Math.hypot(bx-820,by-190)<90;
+    if(inWind&&nearX){catchT+=dt;if(catchT>=1400){api.ok('追上了！熱氣球駕駛技術一流！',2000);return}}
+    else catchT=Math.max(0,catchT-dt);
+    let s=`<rect width="900" height="430" fill="#CFE3EC"/><rect y="360" width="900" height="70" fill="#9DBE7A"/>`;
+    s+=`<rect x="0" y="140" width="900" height="140" fill="#E5EFDF" opacity=".55"/>`;
+    s+=`${by<140?`<text x="120" y="80" font-size="18" font-weight="900" fill="#8A8F98">↑ 高層：逆風往回吹</text>`:''}${by>=280?`<text x="120" y="400" font-size="18" font-weight="900" fill="#8A8F98">↓ 低層：逆風往回吹</text>`:''}<text x="450" y="210" text-anchor="middle" font-size="18" font-weight="900" fill="#50A260">← 中間順風層 →</text>`;
+    s+=`<text x="${820-30}" y="${190-56}" text-anchor="middle" font-size="20" font-weight="900" fill="${INK}">怪盜X</text><g transform="translate(820 190) scale(.55)">${critter(X2_LOOK)}</g>`;
+    s+=`<g transform="translate(${bx} ${by})"><path d="M0 -66 C-52 -66 -52 -6 -16 22 H16 C52 -6 52 -66 0 -66Z" fill="#C86062" stroke="${INK}" stroke-width="5"/><path d="M0 -66 C-20 -66 -20 -6 -6 22 H6 C20 -6 20 -66 0 -66Z" fill="#D4BB49"/><path d="M-14 22 L-9 42 M14 22 L9 42" stroke="${INK}" stroke-width="3"/><rect x="-15" y="42" width="30" height="20" rx="5" fill="#A57E5E" stroke="${INK}" stroke-width="3"/></g>`;
+    if(hold)s+=`<g transform="translate(${bx} ${by+86})"><path d="M0 0 q-10 -12 0 -24 q14 10 4 24z" fill="#D29841" stroke="${INK}" stroke-width="3"/></g>`;
+    q('#brS').innerHTML=s;
+    q('#brN').textContent=nearX&&inWind?`捕捉中…… ${Math.floor(catchT/14)}%`:'找到中間的順風層，靠近怪盜X！';
+    raf=requestAnimationFrame(loop);T2.push(raf)};
+  raf=requestAnimationFrame(loop);T2.push(raf);
+  api.solve(()=>{bx=820;by=190;catchT=9999});
+},960)}

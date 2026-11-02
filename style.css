@@ -407,6 +407,12 @@ button:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
 @media (max-width:760px){.rkrock{min-width:80px;padding:6px}}
 @media (max-width:760px){.cngrid{grid-template-columns:repeat(2,1fr)}}
 
+/* ================= 第四章 鹿野高台 新玩法的樣式 ================= */
+.ducat{display:flex;align-items:center;gap:8px;width:100%;background:#FFFFFF;border:3px solid var(--line);border-radius:12px;padding:6px 10px;margin:5px 0;box-shadow:0 3px 0 var(--line);text-align:left}
+.ducat small{color:var(--ink2);font-weight:900;min-width:44px}
+.ducat b{flex:1;font-size:17px}
+.ducat span{background:var(--sun);border:2px solid var(--line);border-radius:8px;padding:2px 8px;font-weight:900}
+
 /* ================= 第三章 太魯閣 新玩法的樣式（低彩度純色） ================= */
 .lg{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center}
 .lgh{font-weight:900;font-size:17px;padding:4px 6px;text-align:center}
