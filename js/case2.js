@@ -3,7 +3,17 @@
    第二套題目放在 ALTS2（key＝關卡 id，只覆寫 run／intro／ev），破案後再玩時使用。 */
 "use strict";
 const ALTS2={};   // TODO：第二套題目（見 CHANGELOG 待辦）
-function pz2(id,x,y,o){if(G&&G.cs===2&&ALT()&&ALTS2[id])o=Object.assign({},o,ALTS2[id]);return pz(id,x,y,o)}
+/* 關卡位置微調：把擠在一起的調查點分開（新位置 x,y；圖案會跟著移動）。 */
+const C2_MOVE={
+  t_note:[520,372],t_scale:[1130,900],t_en:[1260,930],t_sil:[1470,940],t_idiom:[130,920],t_fork:[250,850],t_sign:[380,900],t_km:[1000,420],
+  l_map:[560,760],l_dress:[700,760],l_sil:[880,960],l_market:[1040,760],l_sing:[1180,950],l_boat:[1320,790],l_baseball:[1480,960],l_dig:[1560,800],l_field:[200,950],
+  k_gates:[90,780],k_history:[300,940],k_tune:[470,790],k_yueqin:[640,950],k_totem:[930,960],k_glow:[1120,950],k_turtle:[1510,960],k_wind:[1350,850],k_guests:[1000,800],k_suspect:[1250,790],k_tide:[930,690],
+  j_kitchen:[350,860],j_box:[500,975],j_table:[600,860]};
+function pz2(id,x,y,o){if(G&&G.cs===2&&ALT()&&ALTS2[id])o=Object.assign({},o,ALTS2[id]);
+  o=Object.assign({},o);const mv=C2_MOVE[id];
+  if(mv){const dx=mv[0]-x,dy=mv[1]-y;x=mv[0];y=mv[1];if(o.art){const a=o.art;o.art=()=>`<g transform="translate(${dx} ${dy})">${a()}</g>`}}
+  if(!o.npc){if(o.sx==null)o.sx=40;if(o.sy==null)o.sy=58}   // 放大鏡放在東西的右上方，不要蓋住圖案
+  return pz(id,x,y,o)}
 
 /* ================= 開場與序章 ================= */
 function c2Opening(){const stage=(inner)=>NIGHT(`<rect x="300" y="560" width="1000" height="60" fill="#5A3E52"/><path d="M300 120 Q800 60 1300 120 V560 H300Z" fill="#3E2E45"/>`+inner);

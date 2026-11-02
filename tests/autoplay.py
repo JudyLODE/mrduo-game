@@ -7,7 +7,7 @@ from playwright.async_api import async_playwright
 SHOTS={};PEEKED={};DL={}
 async def main():
   async with async_playwright() as p:
-    b=await p.chromium.launch();pg=await b.new_page(viewport={'width':1180,'height':820})
+    b=await p.chromium.launch();pg=await b.new_page(viewport={'width':int(os.environ.get('VW','1180')),'height':int(os.environ.get('VH','820'))},has_touch=True)
     errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
     await pg.goto('file://'+os.path.join(OUT,'t.html'));await pg.wait_for_timeout(500)
 
@@ -37,7 +37,9 @@ async def main():
       if await pg.query_selector('#soonOk'):await shot('soon');print('FINISHED (case %d, reached 未完待續) at step'%CASE,step);break
       if await ev("typeof window.__solve==='function'") and await vis('#modal'):
         nm=await ev("(document.querySelector('#mBody h3')||{}).textContent||'g2'")
-        await pg.wait_for_timeout(700);await shot('g2_'+nm[:12]);await ev("window.__solve&&window.__solve()");await pg.wait_for_timeout(2300);continue
+        await pg.wait_for_timeout(700);await shot('g2_'+nm[:12]);ov=await ev("(()=>{const c=document.querySelector('#mBody .card');return c?c.scrollHeight-c.clientHeight:0})()")
+        if ov>8:print('OVERFLOW',ov,nm,flush=True)
+        await ev("window.__solve&&window.__solve()");await pg.wait_for_timeout(2300);continue
       if await pg.query_selector('.cert'):await shot('cert');print('FINISHED at step',step);break
       if await pg.query_selector('.chap'):await pg.click('.chap');await pg.wait_for_timeout(200);continue
       if await pg.query_selector('.cut'):await shot('cut'+str(step//50));await pg.click('.cut');await pg.wait_for_timeout(300);continue

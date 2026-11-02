@@ -95,3 +95,5 @@ python3 tests/autoplay.py             # 第一案也要跑一次，確認沒弄�
 - 不要用漸層色、不要用其他作品的角色。
 - 第二套題目（`ALTS2`）等五章都完成後再做；格式見 DESIGN.md 第 4 節。
 - 動畫（requestAnimationFrame／setInterval）裡要畫多叔圖片時，一律用 `paintSVG()`（在 `js/minigames.js`），不要每格 innerHTML 重建 `<image>`，否則 iPad 上多叔會看不到。
+- 動畫每一格重畫的畫面，不要用 `click` 的 `e.target` 判斷點到什麼（元素會被換掉，點了沒反應）；改用 `pointerdown` 的座標 `svgPt()` 比對。觸控拖曳時 `pointermove` 的 `e.target` 也不可靠，一樣用座標。
+- 調查點不要擠在一起：同一個場景裡，放大鏡之間至少相隔 120（1600×1000 座標）；多叔不能站在水上。

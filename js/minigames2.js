@@ -600,9 +600,10 @@ function photoSnap(title,lead,need){return g2(title,'point',`<p class="lead">${l
   const mk=()=>({x:Math.random()<.5?-60:960,y:80+Math.random()*230,v:(Math.random()<.5?1:-1)*(1.7+Math.random()*1.5),w:Math.random()*10});
   const bird=p=>`<g transform="translate(${p.x} ${p.y}) scale(${p.v>0?1:-1} 1)"><path d="M-6 4 L-28 -6 L-21 4 L-28 14Z" fill="#34405F"/><ellipse rx="14" ry="8" fill="#34405F"/><ellipse cx="4" cy="4" rx="9" ry="5" fill="#F4EEE6"/><circle cx="12" cy="-4" r="4.5" fill="#C86062"/><path d="M15 -3 l12 2.5 l-12 3.5z" fill="#3A3A40"/><path d="M-2 -6 q${p.w%2?10:-10} -14 ${p.w%2?20:2} -6" stroke="#34405F" stroke-width="4.5" fill="none" stroke-linecap="round"/></g>`;
   const drawBG=()=>`<rect width="900" height="420" fill="#BFD9E6"/><path d="M0 330 Q200 300 400 330 T900 320 V420 H0Z" fill="#DADCDA"/><path d="M620 420 L700 170 H770 L700 420Z" fill="#D0D3D1"/><path d="M640 240 h84 M652 200 h60" stroke="#B9BCBA" stroke-width="5"/>`;
-  const loop=now=>{if(api.over())return;
+  let lastT=performance.now();
+  const loop=now=>{if(api.over())return;const k=Math.min(3,(now-lastT)/16.7);lastT=now;   // 依時間移動：120Hz 的 iPad 也不會變成兩倍快
     if(now>next){birds.push(mk());next=now+850+Math.random()*900}
-    birds.forEach(b=>{b.x+=b.v;b.w+=.35});
+    birds.forEach(b=>{b.x+=b.v*k;b.w+=.35*k});
     birds=birds.filter(b=>b.x>-100&&b.x<1000);
     q('#phS').innerHTML=drawBG()+birds.map(bird).join('')+
       `<circle cx="450" cy="205" r="95" fill="none" stroke="#C86062" stroke-width="6" stroke-dasharray="14 10"/><path d="M450 124 v-22 M450 286 v22 M369 205 h-22 M531 205 h22" stroke="#C86062" stroke-width="5"/>`;
@@ -870,9 +871,11 @@ function fieldFence(title,lead,rounds,okMsg){return g2(title,'think',`<p class="
     q('#ffS').innerHTML=s};
   const info=()=>{if(!rect)return'';const w=rect[2]-rect[0]+1,h=rect[3]-rect[1]+1;return `寬 ${w}、長 ${h}　面積 ${w*h}、周長 ${(w+h)*2}`};
   const ask=()=>{if(i>=rounds.length)return;rect=null;q('#ffQ').innerHTML=rounds[i].q+`<br><small>在方格上<b>按住拖曳</b>出一個長方形。</small>`;draw()};
-  q('#ffS').addEventListener('pointerdown',e=>{const g=e.target.closest('[data-c]');if(!g)return;anchor=[+g.dataset.c,+g.dataset.r];rect=null});
-  q('#ffS').addEventListener('pointermove',e=>{if(!anchor)return;const g=e.target.closest('[data-c]');if(!g)return;
-    const c=+g.dataset.c,r=+g.dataset.r;rect=[Math.min(anchor[0],c),Math.min(anchor[1],r),Math.max(anchor[0],c),Math.max(anchor[1],r)];draw();
+  // 用座標算格子（iPad 觸控拖曳時 e.target 會一直是按下去的那一格，不能用 e.target）
+  const cellAt=e=>{const p=svgPt(q('#ffS'),e);const c=Math.floor((p.x-20)/GW),r=Math.floor((p.y-20)/GW);return c>=0&&c<C&&r>=0&&r<R?[c,r]:null};
+  q('#ffS').addEventListener('pointerdown',e=>{const g=cellAt(e);if(!g)return;anchor=g;rect=[g[0],g[1],g[0],g[1]];try{q('#ffS').setPointerCapture(e.pointerId)}catch(_){}draw()});
+  q('#ffS').addEventListener('pointermove',e=>{if(!anchor)return;const g=cellAt(e);if(!g)return;
+    const c=g[0],r=g[1];rect=[Math.min(anchor[0],c),Math.min(anchor[1],r),Math.max(anchor[0],c),Math.max(anchor[1],r)];draw();
     q('#ffQ').innerHTML=rounds[i].q+`<br><small>${info()}</small>`});
   q('#ffS').addEventListener('pointerup',()=>anchor=null);
   q('#ffOk').onclick=()=>{if(i>=rounds.length)return;if(!rect){api.say('先在方格上拖出一個長方形。');return}
@@ -1169,7 +1172,7 @@ function uvChase(title){return g2(title,'gasp',`<p class="lead">白煙裡有好�
   const {q}=api;let feet=[],prog=0,raf,last=performance.now(),next=0;
   const foot=(x,y,real)=>`<g data-f="${real?1:0}" style="cursor:pointer" transform="translate(${x} ${y})"><ellipse rx="13" ry="19" fill="${real?'#B8F59A':'#6E6A80'}" opacity="${real?'.95':'.6'}" stroke="${real?'#50A260':'#3E3A50'}" stroke-width="3"/>${real?`<ellipse rx="13" ry="19" fill="none" stroke="#B8F59A" stroke-width="6" opacity=".3"/>`:''}</g>`;
   const loop=now=>{if(api.over())return;const dt=Math.min(50,now-last);last=now;next-=dt;
-    if(next<=0){feet.push({x:880,y:80+Math.random()*280,real:Math.random()<.55,t:now});next=750}
+    if(next<=0){feet.push({x:90+Math.random()*620,y:90+Math.random()*270,real:Math.random()<.55,t:now});next=750}
     feet=feet.filter(f=>now-f.t<5200);
     q('#ucS').innerHTML=`<circle cx="120" cy="60" r="3" fill="#F7F0DE"/><circle cx="420" cy="40" r="2.5" fill="#F7F0DE"/><circle cx="700" cy="80" r="3" fill="#F7F0DE"/>
      <g transform="translate(810 210) scale(.9)">${critter(Object.assign({},X2_LOOK,{mood:'grin'}))}</g>
@@ -1177,9 +1180,12 @@ function uvChase(title){return g2(title,'gasp',`<p class="lead">白煙裡有好�
     q('#ucN').textContent=`追捕進度：${Math.floor(prog)}%`;
     if(prog>=100){api.ok('追上了！怪盜X 的法術全破功！',2000);return}
     raf=requestAnimationFrame(loop);T2.push(raf)};
-  q('#ucS').onclick=e=>{const g=e.target.closest('[data-f]');if(!g)return;
-    if(g.dataset.f==='1'){prog=Math.min(100,prog+12);sGood();tone([660,880],.07)}
-    else{prog=Math.max(0,prog-4);sBad();api.say('那是舊腳印！找「發亮」的！')}}; 
+  // 腳印每一格都會重畫，所以用「按下去的位置」判斷點到哪一個（不能用 click 的 e.target，iPad 會點不到）
+  q('#ucS').addEventListener('pointerdown',e=>{const p=svgPt(q('#ucS'),e);let best=null,bd=60;
+    feet.forEach(f=>{const d=Math.hypot(f.x-p.x,f.y-p.y);if(d<bd){bd=d;best=f}});if(!best)return;
+    feet.splice(feet.indexOf(best),1);
+    if(best.real){prog=Math.min(100,prog+12);sGood();tone([660,880],.07)}
+    else{prog=Math.max(0,prog-4);sBad();api.say('那是舊腳印！找「發亮」的！')}});
   raf=requestAnimationFrame(loop);T2.push(raf);
   api.solve(()=>{prog=100});
 },960)}

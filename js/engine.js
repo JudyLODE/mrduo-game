@@ -262,7 +262,9 @@ function spotSvg(sp){
   }
   return s+'</g>';
 }
-function drawSpots(){if(!SC)return;const dy=SC.duo?SC.duo[1]:0,back=SC.spots.filter(s=>SC.duo&&s.y<dy-40),front=SC.spots.filter(s=>!back.includes(s));$('#spotL').innerHTML=back.map(spotSvg).join('')+(SC.duo?duoImg(...SC.duo):'')+front.map(spotSvg).join('');updateTask()}
+/* 被多叔擋住的調查點：在最上層再放一個透明的點擊範圍，小朋友點得到 */
+const hitOnly=sp=>{const m=spotSvg(sp).match(/<(circle|rect) class="hit"[^>]*\/>/);return m?`<g class="spot" data-id="${sp.id}">${m[0]}</g>`:''};
+function drawSpots(){if(!SC)return;const dy=SC.duo?SC.duo[1]:0,back=SC.spots.filter(s=>SC.duo&&s.y<dy-40),front=SC.spots.filter(s=>!back.includes(s));$('#spotL').innerHTML=back.map(spotSvg).join('')+(SC.duo?duoImg(...SC.duo):'')+front.map(spotSvg).join('')+back.map(hitOnly).join('');updateTask()}
 function setScene(def){if(typeof G!=='undefined'&&G){const dn=(G.done||{})[G.ch]||[];def.spots.forEach(s=>{if(s.need&&s.tap&&dn.includes(s.id))s.done=true;if(s.type==='badge'&&(G.badges||[]).includes(s.bid))s.got=true})}SC=def;DUO.at=null;cancelAnimationFrame(camRaf);camSet(0,0,1600);CAM.last=null;for(const k in ACT)delete ACT[k];$('#bgL').innerHTML=def.bg();$('#fxL').innerHTML='';$('#stage').style.background=def.color||'#92C3DB';drawSpots()}
 function spot(id){return SC.spots.find(s=>s.id===id)}
 function updateTask(){

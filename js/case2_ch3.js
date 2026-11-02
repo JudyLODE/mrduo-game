@@ -42,7 +42,7 @@ const MP_STONE=`<svg viewBox="0 0 80 60" style="width:100%;max-height:64px;displ
 /* ================= 第三章本體 ================= */
 async function c2ch3(){
   G.ch=3;save();setCh('第三章　會呼吸的石頭');DUO.coat=true;
-  setScene({id:'taroko',color:'#BFD9E6',bg:bgTaroko,duo:[760,895,300],ground:()=>895,range:[150,1450],spots:[
+  setScene({id:'taroko',color:'#BFD9E6',bg:bgTaroko,duo:[800,930,300],ground:()=>930,range:[150,1450],spots:[
     pz2('t_hut',1285,760,{r:55,hint:'步道小屋掛著「地質教室」的牌子，桌上擺著岩石標本。',art:tHutArt,
       intro:[['macaque','偵探先生！我是台灣獼猴巡山員。怪盜X 表演「會呼吸的石頭」，表演完，展示館的大理石燕子就不見了！'],
              ['duo','大理石燕子……{n}，先來上上巡山員的地質課！會看岩石，才找得到怪盜X 的線索。',{e:'think'}]],

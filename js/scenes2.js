@@ -80,6 +80,9 @@ function bgTaroko(){return `<rect width="1600" height="1000" fill="#BFD9E6"/>
   <!-- suspension bridge -->
   <path d="M380 300 Q800 420 1220 300" stroke="#B5432F" stroke-width="12" fill="none"/><path d="M380 300 Q800 470 1220 300" stroke="#8C6A4E" stroke-width="10" fill="none"/>
   ${Array.from({length:15},(_,i)=>{const x=440+i*50,t=(x-380)/840,y1=300+Math.sin(t*Math.PI)*90,y2=300+Math.sin(t*Math.PI)*150;return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="#B5432F" stroke-width="3"/>`}).join('')}
+  <!-- footbridge over the river so 多叔 never stands on water -->
+  <rect x="430" y="902" width="760" height="34" fill="#A57E5E" stroke="${OL}" stroke-width="5"/>${Array.from({length:19},(_,i)=>`<line x1="${450+i*40}" y1="902" x2="${450+i*40}" y2="936" stroke="#8C6A4E" stroke-width="3"/>`).join('')}
+  ${[470,800,1150].map(x=>`<rect x="${x-6}" y="936" width="12" height="64" fill="#6B523D"/>`).join('')}
   <!-- trail ledge and hut -->
   <path d="M0 760 Q300 740 600 770 L560 1000 H0Z" fill="#B7A288" stroke="${OL}" stroke-width="6"/>
   <path d="M1040 780 Q1300 750 1600 770 V1000 H1100Z" fill="#B7A288" stroke="${OL}" stroke-width="6"/>
